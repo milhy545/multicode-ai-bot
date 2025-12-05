@@ -28,7 +28,7 @@ git tag -l
 git push origin v1.0.0
 
 # Pokud to nefunguje (403 error), udělej to na GitHubu ručně:
-# 1. Jdi na: https://github.com/milhy545/claude-code-telegram/releases/new
+# 1. Jdi na: https://github.com/milhy545/multicode-ai-bot/releases/new
 # 2. Tag: v1.0.0
 # 3. Target: vyberte svůj branch (claude/testing-...)
 # 4. Release title: "v1.0.0 - MultiCode AI Bot with 8 AI Providers"
@@ -70,7 +70,7 @@ python -m twine upload dist/*
 
 ### 3a. Vytvoř Release na GitHubu:
 
-1. Jdi na: https://github.com/milhy545/claude-code-telegram/releases/new
+1. Jdi na: https://github.com/milhy545/multicode-ai-bot/releases/new
 2. **Tag**: v1.0.0
 3. **Release title**: `v1.0.0 - MultiCode AI Bot with 8 AI Providers 🎉`
 4. **Description**: Zkopíruj obsah z `RELEASE_NOTES.md`
@@ -256,9 +256,9 @@ Telegram bot s podporou 8 AI providerů pro kódování:
 - 85%+ test coverage
 
 Install:
-curl -fsSL https://raw.githubusercontent.com/milhy545/claude-code-telegram/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/milhy545/multicode-ai-bot/main/install.sh | bash
 
-GitHub: https://github.com/milhy545/claude-code-telegram
+GitHub: https://github.com/milhy545/multicode-ai-bot
 PyPI: https://pypi.org/project/multicode-ai-bot/
 ```
 

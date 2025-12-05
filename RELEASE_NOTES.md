@@ -26,7 +26,7 @@
 
 | Metoda | Příkaz |
 |--------|--------|
-| 🚀 curl\|bash | `curl -fsSL https://raw.githubusercontent.com/milhy545/claude-code-telegram/main/install.sh \| bash` |
+| 🚀 curl\|bash | `curl -fsSL https://raw.githubusercontent.com/milhy545/multicode-ai-bot/main/install.sh \| bash` |
 | 🐳 Docker | `docker-compose up -d` |
 | 📦 PyPI | `pip install multicode-ai-bot` |
 | 📱 Flatpak | `flatpak install multicode-bot` |
@@ -54,7 +54,7 @@
 #### Nejrychlejší způsob:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/milhy545/claude-code-telegram/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/milhy545/multicode-ai-bot/main/install.sh | bash
 cd ~/.multicode-bot
 nano .env  # Konfiguruj
 ./multicode-bot
@@ -63,7 +63,7 @@ nano .env  # Konfiguruj
 #### Docker (doporučeno pro server):
 
 ```bash
-git clone https://github.com/milhy545/claude-code-telegram.git
+git clone https://github.com/milhy545/multicode-ai-bot.git
 cd claude-code-telegram
 cp .env.example .env
 nano .env

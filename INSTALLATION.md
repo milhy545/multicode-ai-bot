@@ -7,13 +7,13 @@ Všechny způsoby, jak nainstalovat **MultiCode AI Bot** na jakýkoliv systém!
 **Nejrychlejší způsob** - instalace jedním příkazem (jako Claude CLI):
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/milhy545/claude-code-telegram/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/milhy545/multicode-ai-bot/main/install.sh | bash
 ```
 
 ### S vlastní cestou:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/milhy545/claude-code-telegram/main/install.sh | bash -s -- --dir /custom/path
+curl -fsSL https://raw.githubusercontent.com/milhy545/multicode-ai-bot/main/install.sh | bash -s -- --dir /custom/path
 ```
 
 Po instalaci:
@@ -32,7 +32,7 @@ nano .env  # Konfiguruj
 ### Quick Start:
 
 ```bash
-git clone https://github.com/milhy545/claude-code-telegram.git
+git clone https://github.com/milhy545/multicode-ai-bot.git
 cd claude-code-telegram
 
 cp .env.example .env
@@ -153,7 +153,7 @@ snap connect multicode-bot:home
 ### Download (až bude release):
 
 ```bash
-wget https://github.com/milhy545/claude-code-telegram/releases/download/v1.0.0/MultiCode-AI-Bot-1.0.0-x86_64.AppImage
+wget https://github.com/milhy545/multicode-ai-bot/releases/download/v1.0.0/MultiCode-AI-Bot-1.0.0-x86_64.AppImage
 chmod +x MultiCode-AI-Bot-1.0.0-x86_64.AppImage
 ./MultiCode-AI-Bot-1.0.0-x86_64.AppImage
 ```
@@ -194,7 +194,7 @@ sudo apt install appimagelauncher
 
 ```bash
 # Clone
-git clone https://github.com/milhy545/claude-code-telegram.git
+git clone https://github.com/milhy545/multicode-ai-bot.git
 cd claude-code-telegram
 
 # Instaluj Poetry (pokud nemáš)
@@ -372,4 +372,4 @@ Po instalaci:
 
 **Enjoy coding with 8 AI assistants! 🚀**
 
-Problémy? [Open an issue](https://github.com/milhy545/claude-code-telegram/issues)
+Problémy? [Open an issue](https://github.com/milhy545/multicode-ai-bot/issues)

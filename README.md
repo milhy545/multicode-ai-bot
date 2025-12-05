@@ -53,7 +53,7 @@ Perfect for code reviews on mobile, quick fixes while traveling, or getting AI a
 
 | Method | Best For | Install Command |
 |--------|----------|-----------------|
-| 🚀 **curl\|bash** | Fastest setup | `curl -fsSL https://raw.githubusercontent.com/milhy545/claude-code-telegram/main/install.sh \| bash` |
+| 🚀 **curl\|bash** | Fastest setup | `curl -fsSL https://raw.githubusercontent.com/milhy545/multicode-ai-bot/main/install.sh \| bash` |
 | 🐳 **Docker** | Production servers | `docker-compose up -d` |
 | 📦 **PyPI** | Python projects | `pip install multicode-ai-bot` |
 | 📱 **Flatpak** | Linux desktop | `flatpak install multicode-bot` |
@@ -64,7 +64,7 @@ Perfect for code reviews on mobile, quick fixes while traveling, or getting AI a
 ### One-Line Install (Recommended):
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/milhy545/claude-code-telegram/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/milhy545/multicode-ai-bot/main/install.sh | bash
 ```
 
 Then configure `.env` and run:

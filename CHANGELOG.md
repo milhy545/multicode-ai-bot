@@ -23,4 +23,4 @@ First stable release of **MultiCode AI Bot** - the multi-AI Telegram bot with 8 
 - Multi-platform support
 - Comprehensive documentation
 
-[1.0.0]: https://github.com/milhy545/claude-code-telegram/releases/tag/v1.0.0
+[1.0.0]: https://github.com/milhy545/multicode-ai-bot/releases/tag/v1.0.0

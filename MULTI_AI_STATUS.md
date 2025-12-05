@@ -654,8 +654,8 @@ See `GeminiProvider` as reference implementation.
 
 ## 📞 Support
 
-**Issues:** https://github.com/milhy545/claude-code-telegram/issues
-**Discussions:** https://github.com/milhy545/claude-code-telegram/discussions
+**Issues:** https://github.com/milhy545/multicode-ai-bot/issues
+**Discussions:** https://github.com/milhy545/multicode-ai-bot/discussions
 
 **Quick Links:**
 - Gemini API Keys: https://aistudio.google.com/

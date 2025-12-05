@@ -8,7 +8,7 @@ Tento soubor obsahuje všechny způsoby, jak spustit **MultiCode AI Bot** v Dock
 
 ```bash
 # Naklonuj repo
-git clone https://github.com/milhy545/claude-code-telegram.git
+git clone https://github.com/milhy545/multicode-ai-bot.git
 cd claude-code-telegram
 
 # Zkopíruj .env
@@ -372,4 +372,4 @@ Pokud chceš menší Docker image, viz `Dockerfile.alpine`.
 
 ---
 
-**Otázky? Issues: https://github.com/milhy545/claude-code-telegram/issues**
+**Otázky? Issues: https://github.com/milhy545/multicode-ai-bot/issues**

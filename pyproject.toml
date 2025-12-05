@@ -8,9 +8,9 @@ authors = [
 ]
 license = "MIT"
 readme = "README.md"
-homepage = "https://github.com/milhy545/claude-code-telegram"
-repository = "https://github.com/milhy545/claude-code-telegram"
-documentation = "https://github.com/milhy545/claude-code-telegram/blob/main/MULTI_AI_STATUS.md"
+homepage = "https://github.com/milhy545/multicode-ai-bot"
+repository = "https://github.com/milhy545/multicode-ai-bot"
+documentation = "https://github.com/milhy545/multicode-ai-bot/blob/main/MULTI_AI_STATUS.md"
 keywords = [
     "telegram", "bot", "ai", "claude", "gemini", "openai", "deepseek", "groq",
     "ollama", "multi-ai", "coding-assistant", "development", "remote", "llm"
