@@ -1,9 +1,11 @@
-# MultiCode AI Bot 🤖✨
+# MultiCode AI Telegram Bot 🤖✨
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
 [![Multi-AI](https://img.shields.io/badge/Multi--AI-8%20Providers-blue)](MULTI_AI_STATUS.md)
 [![Test Coverage](https://img.shields.io/badge/coverage-85%25-brightgreen)](htmlcov/index.html)
+
+> 🔧 **Forked and enhanced from** [claude-code-telegram](https://github.com/RichardAtCT/claude-code-telegram) by Richard Atkinson (MIT License)
 
 A powerful Telegram bot that provides remote access to **8 different AI coding assistants**, enabling developers to interact with their projects from anywhere with the perfect AI for each task. Transform your phone into a development terminal with multi-AI assistance, project navigation, and session persistence.
 
@@ -591,11 +593,29 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 If you find this project useful, please consider giving it a star! ⭐
 
-## 🙏 Acknowledgments
+## 🙏 Credits & Acknowledgments
 
+### Original Project
+This project is a fork of [claude-code-telegram](https://github.com/RichardAtCT/claude-code-telegram) by **Richard Atkinson**.
+
+- **Original Author**: Richard Atkinson ([GitHub](https://github.com/RichardAtCT))
+- **Original License**: MIT License (maintained in this fork)
+- **Original Concept**: Telegram bot for remote Claude Code access
+
+### Fork Maintainer
+- **Enhanced By**: milhy545 ([GitHub](https://github.com/milhy545))
+- **Fork Started**: 2024
+- **Major Changes**: Multi-AI support (8 providers), AI abstraction layer, PyPI publishing, enhanced features
+
+### Special Thanks
 - [Claude](https://claude.ai) by Anthropic for the amazing AI capabilities
+- [OpenAI](https://openai.com) for GPT models
+- [DeepSeek](https://deepseek.com), [Groq](https://groq.com), and all AI provider teams
 - [python-telegram-bot](https://github.com/python-telegram-bot/python-telegram-bot) for the excellent Telegram integration
-- All contributors who help make this project better
+- All contributors who help make both projects better
+
+### Contributing Back
+While this fork has diverged significantly from the original project, we acknowledge and respect the foundation provided by Richard Atkinson's work. If you're looking for a simpler, Claude-focused solution, check out the [original project](https://github.com/RichardAtCT/claude-code-telegram).
 
 ---
 

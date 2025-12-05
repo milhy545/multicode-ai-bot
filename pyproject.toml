@@ -3,8 +3,8 @@ name = "multicode-ai-bot"
 version = "1.0.0"
 description = "Multi-AI Telegram Bot - Access 8 AI coding assistants (Claude, Gemini, OpenAI, DeepSeek, Groq, Ollama, Blackbox, Windsurf) through Telegram"
 authors = [
-    "Your Name <your.email@example.com>",
-    "Richard Atkinson <richardatk01@gmail.com> (original author)"
+    "milhy545 <milhy777@gmail.com>",
+    "Richard Atkinson <richardatk01@gmail.com>",
 ]
 license = "MIT"
 readme = "README.md"
