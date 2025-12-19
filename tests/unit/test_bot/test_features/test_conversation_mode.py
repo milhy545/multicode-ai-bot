@@ -134,7 +134,9 @@ class TestContextUpdateFromResponse:
         """Test detection of TODO items in response."""
         response = Mock(spec=ClaudeResponse)
         response.session_id = "test"
-        response.content = "TODO: Add tests. FIXME: Fix issue. NOTE: Important. HACK: Workaround."
+        response.content = (
+            "TODO: Add tests. FIXME: Fix issue. NOTE: Important. HACK: Workaround."
+        )
         response.is_error = False
         response.tools_used = []
         response.cost = 0.01
@@ -270,7 +272,9 @@ class TestFollowUpSuggestions:
 
         assert len(suggestions) > 0
         # Should suggest explaining or improving
-        assert any("explain" in s.lower() or "improve" in s.lower() for s in suggestions)
+        assert any(
+            "explain" in s.lower() or "improve" in s.lower() for s in suggestions
+        )
 
     def test_suggestions_for_bash_tool(self, enhancer):
         """Test suggestions when Bash tool was used."""
@@ -300,7 +304,9 @@ class TestFollowUpSuggestions:
 
         assert len(suggestions) > 0
         # Should suggest analyzing results
-        assert any("analyze" in s.lower() or "summary" in s.lower() for s in suggestions)
+        assert any(
+            "analyze" in s.lower() or "summary" in s.lower() for s in suggestions
+        )
 
     def test_suggestions_for_errors(self, enhancer, error_response):
         """Test suggestions when response contains errors."""
@@ -309,7 +315,9 @@ class TestFollowUpSuggestions:
 
         assert len(suggestions) > 0
         # Should suggest debugging or alternative approaches
-        assert any("debug" in s.lower() or "alternative" in s.lower() for s in suggestions)
+        assert any(
+            "debug" in s.lower() or "alternative" in s.lower() for s in suggestions
+        )
 
     def test_suggestions_for_todo_content(self, enhancer):
         """Test suggestions when response mentions TODOs."""
@@ -394,7 +402,10 @@ class TestFollowUpSuggestions:
         # Should have suggestions
         assert len(suggestions) > 0
         # At least one suggestion should be error-related (likely prioritized first)
-        assert any("error" in s.lower() or "debug" in s.lower() or "fix" in s.lower() for s in suggestions)
+        assert any(
+            "error" in s.lower() or "debug" in s.lower() or "fix" in s.lower()
+            for s in suggestions
+        )
 
 
 class TestFollowUpKeyboard:
@@ -485,8 +496,16 @@ class TestShouldShowSuggestions:
     def test_show_suggestions_for_actionable_content(self, enhancer):
         """Test suggestions shown for actionable content."""
         actionable_keywords = [
-            "todo", "fixme", "next", "consider", "you can",
-            "try", "test", "check", "verify", "review"
+            "todo",
+            "fixme",
+            "next",
+            "consider",
+            "you can",
+            "try",
+            "test",
+            "check",
+            "verify",
+            "review",
         ]
 
         for keyword in actionable_keywords:
@@ -528,7 +547,9 @@ class TestFormatResponseWithSuggestions:
         assert len(content) <= 150  # Allow for truncation message
         assert "truncated" in content.lower()
 
-    def test_format_response_adds_session_info_on_first_turn(self, enhancer, sample_response):
+    def test_format_response_adds_session_info_on_first_turn(
+        self, enhancer, sample_response
+    ):
         """Test session info added on first turn."""
         context = ConversationContext(user_id=123456, conversation_turn=1)
         content, keyboard = enhancer.format_response_with_suggestions(

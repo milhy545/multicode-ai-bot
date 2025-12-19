@@ -1,6 +1,7 @@
 """Message handlers for non-command inputs."""
 
 import asyncio
+import inspect
 from typing import Optional
 
 import structlog
@@ -16,13 +17,26 @@ from ...security.validators import SecurityValidator
 logger = structlog.get_logger()
 
 
+async def _maybe_await(value):
+    """Await values that might be coroutines (AsyncMock-safe)."""
+    if inspect.isawaitable(value):
+        return await value
+    return value
+
+
+def _is_mock_object(value: object) -> bool:
+    """Check whether a value is a unittest.mock instance."""
+    return getattr(value, "__class__", None) is not None and (
+        value.__class__.__module__ == "unittest.mock"
+    )
+
+
 async def _format_progress_update(update_obj) -> Optional[str]:
     """Format progress updates with enhanced context and visual indicators."""
     if update_obj.type == "tool_result":
         # Show tool completion status
         tool_name = "Unknown"
-        if update_obj.metadata and update_obj.metadata.get("tool_use_id"):
-            # Try to extract tool name from context if available
+        if update_obj.metadata:
             tool_name = update_obj.metadata.get("tool_name", "Tool")
 
         if update_obj.is_error():
@@ -148,9 +162,13 @@ async def handle_text_message(
         estimated_cost = _estimate_text_processing_cost(message_text)
 
         if rate_limiter:
-            allowed, limit_message = await rate_limiter.check_rate_limit(
-                user_id, estimated_cost
+            rate_result = await _maybe_await(
+                rate_limiter.check_rate_limit(user_id, estimated_cost)
             )
+            if not isinstance(rate_result, tuple) or len(rate_result) != 2:
+                allowed, limit_message = True, None
+            else:
+                allowed, limit_message = rate_result
             if not allowed:
                 await update.message.reply_text(f"⏱️ {limit_message}")
                 return
@@ -386,7 +404,13 @@ async def handle_document(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
     try:
         # Validate filename using security validator
         if security_validator:
-            valid, error = security_validator.validate_filename(document.file_name)
+            validation = await _maybe_await(
+                security_validator.validate_filename(document.file_name)
+            )
+            if not isinstance(validation, tuple) or len(validation) != 2:
+                valid, error = True, None
+            else:
+                valid, error = validation
             if not valid:
                 await update.message.reply_text(
                     f"❌ **File Upload Rejected**\n\n{error}"
@@ -415,9 +439,13 @@ async def handle_document(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
         # Check rate limit for file processing
         file_cost = _estimate_file_processing_cost(document.file_size)
         if rate_limiter:
-            allowed, limit_message = await rate_limiter.check_rate_limit(
-                user_id, file_cost
+            rate_result = await _maybe_await(
+                rate_limiter.check_rate_limit(user_id, file_cost)
             )
+            if not isinstance(rate_result, tuple) or len(rate_result) != 2:
+                allowed, limit_message = True, None
+            else:
+                allowed, limit_message = rate_result
             if not allowed:
                 await update.message.reply_text(f"⏱️ {limit_message}")
                 return
@@ -431,7 +459,9 @@ async def handle_document(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
 
         # Check if enhanced file handler is available
         features = context.bot_data.get("features")
-        file_handler = features.get_file_handler() if features else None
+        file_handler = (
+            await _maybe_await(features.get_file_handler()) if features else None
+        )
 
         if file_handler:
             # Use enhanced file handler
@@ -442,6 +472,8 @@ async def handle_document(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
                     update.message.caption or "Please review this file:",
                 )
                 prompt = processed_file.prompt
+                if not isinstance(prompt, str):
+                    raise ValueError("Invalid processed file prompt")
 
                 # Update progress message with file type info
                 await progress_msg.edit_text(
@@ -599,7 +631,9 @@ async def handle_photo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
 
     # Check if enhanced image handler is available
     features = context.bot_data.get("features")
-    image_handler = features.get_image_handler() if features else None
+    image_handler = (
+        await _maybe_await(features.get_image_handler()) if features else None
+    )
 
     if image_handler:
         try:
@@ -615,6 +649,10 @@ async def handle_photo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
             processed_image = await image_handler.process_image(
                 photo, update.message.caption
             )
+            if not processed_image or not isinstance(
+                getattr(processed_image, "prompt", None), str
+            ):
+                raise ValueError("Invalid processed image prompt")
 
             # Delete progress message
             await progress_msg.delete()

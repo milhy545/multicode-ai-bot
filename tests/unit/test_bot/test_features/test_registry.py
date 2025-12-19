@@ -95,7 +95,9 @@ class TestFeatureRegistryInitialization:
         if config.enable_quick_actions:
             assert "quick_actions" in registry.features
 
-    def test_features_disabled_when_configured(self, config_minimal, storage, security_validator):
+    def test_features_disabled_when_configured(
+        self, config_minimal, storage, security_validator
+    ):
         """Test features are not initialized when disabled."""
         registry = FeatureRegistry(config_minimal, storage, security_validator)
 
@@ -144,7 +146,9 @@ class TestIsEnabled:
         """Test is_enabled returns False for inactive features."""
         assert registry.is_enabled("nonexistent_feature") is False
 
-    def test_is_enabled_for_disabled_feature(self, config_minimal, storage, security_validator):
+    def test_is_enabled_for_disabled_feature(
+        self, config_minimal, storage, security_validator
+    ):
         """Test is_enabled for features disabled by config."""
         registry = FeatureRegistry(config_minimal, storage, security_validator)
         assert registry.is_enabled("file_handler") is False
@@ -165,7 +169,9 @@ class TestGetFileHandler:
         else:
             assert file_handler is None
 
-    def test_get_file_handler_when_disabled(self, config_minimal, storage, security_validator):
+    def test_get_file_handler_when_disabled(
+        self, config_minimal, storage, security_validator
+    ):
         """Test getting file handler when disabled."""
         registry = FeatureRegistry(config_minimal, storage, security_validator)
         file_handler = registry.get_file_handler()
@@ -175,7 +181,9 @@ class TestGetFileHandler:
 class TestGetGitIntegration:
     """Test get_git_integration method."""
 
-    def test_get_git_integration_when_enabled(self, config, storage, security_validator):
+    def test_get_git_integration_when_enabled(
+        self, config, storage, security_validator
+    ):
         """Test getting git integration when enabled."""
         registry = FeatureRegistry(config, storage, security_validator)
         git = registry.get_git_integration()
@@ -185,7 +193,9 @@ class TestGetGitIntegration:
         else:
             assert git is None
 
-    def test_get_git_integration_when_disabled(self, config_minimal, storage, security_validator):
+    def test_get_git_integration_when_disabled(
+        self, config_minimal, storage, security_validator
+    ):
         """Test getting git integration when disabled."""
         registry = FeatureRegistry(config_minimal, storage, security_validator)
         git = registry.get_git_integration()
@@ -205,7 +215,9 @@ class TestGetQuickActions:
         else:
             assert quick_actions is None
 
-    def test_get_quick_actions_when_disabled(self, config_minimal, storage, security_validator):
+    def test_get_quick_actions_when_disabled(
+        self, config_minimal, storage, security_validator
+    ):
         """Test getting quick actions when disabled."""
         registry = FeatureRegistry(config_minimal, storage, security_validator)
         quick_actions = registry.get_quick_actions()
@@ -398,4 +410,6 @@ class TestFeatureGetterMethods:
         assert registry.get_quick_actions() == registry.get_feature("quick_actions")
         assert registry.get_session_export() == registry.get_feature("session_export")
         assert registry.get_image_handler() == registry.get_feature("image_handler")
-        assert registry.get_conversation_enhancer() == registry.get_feature("conversation")
+        assert registry.get_conversation_enhancer() == registry.get_feature(
+            "conversation"
+        )

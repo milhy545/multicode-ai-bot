@@ -14,6 +14,9 @@ from typing import Any, Dict, List, Optional
 
 import structlog
 
+from src.storage.facade import Storage
+from src.storage.models import AuditLogModel
+
 # from src.exceptions import SecurityError  # Future use
 
 logger = structlog.get_logger()
@@ -120,6 +123,80 @@ class InMemoryAuditStorage(AuditStorage):
         # Sort by timestamp (newest first) and limit
         filtered_events.sort(key=lambda e: e.timestamp, reverse=True)
         return filtered_events[:limit]
+
+    async def get_security_violations(
+        self, user_id: Optional[int] = None, limit: int = 100
+    ) -> List[AuditEvent]:
+        """Get security violations."""
+        return await self.get_events(
+            user_id=user_id, event_type="security_violation", limit=limit
+        )
+
+
+class SQLiteAuditStorage(AuditStorage):
+    """SQLite-backed audit storage."""
+
+    def __init__(self, storage: Storage) -> None:
+        self.storage = storage
+
+    async def store_event(self, event: AuditEvent) -> None:
+        """Store audit event in database."""
+        audit_event = AuditLogModel(
+            id=None,
+            user_id=event.user_id,
+            event_type=event.event_type,
+            event_data={
+                "details": event.details,
+                "risk_level": event.risk_level,
+                "session_id": event.session_id,
+            },
+            success=event.success,
+            timestamp=event.timestamp,
+            ip_address=event.ip_address,
+        )
+        await self.storage.audit.log_event(audit_event)
+
+    async def get_events(
+        self,
+        user_id: Optional[int] = None,
+        event_type: Optional[str] = None,
+        start_time: Optional[datetime] = None,
+        end_time: Optional[datetime] = None,
+        limit: int = 100,
+    ) -> List[AuditEvent]:
+        """Retrieve audit events with filters."""
+        logs = await self.storage.get_audit_events(
+            user_id=user_id,
+            event_type=event_type,
+            start_time=start_time,
+            end_time=end_time,
+            limit=limit,
+        )
+
+        events = []
+        for log in logs:
+            details = {}
+            risk_level = "low"
+            session_id = None
+            if log.event_data:
+                details = log.event_data.get("details", {})
+                risk_level = log.event_data.get("risk_level", "low")
+                session_id = log.event_data.get("session_id")
+
+            events.append(
+                AuditEvent(
+                    timestamp=log.timestamp,
+                    user_id=log.user_id,
+                    event_type=log.event_type,
+                    success=log.success,
+                    details=details,
+                    ip_address=log.ip_address,
+                    session_id=session_id,
+                    risk_level=risk_level,
+                )
+            )
+
+        return events
 
     async def get_security_violations(
         self, user_id: Optional[int] = None, limit: int = 100

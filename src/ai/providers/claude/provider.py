@@ -4,10 +4,14 @@ This wraps the existing Claude integration (facade.py) to conform to the
 BaseAIProvider interface, allowing Claude to work alongside other AI providers.
 """
 
-import structlog
 from pathlib import Path
 from typing import AsyncIterator, Optional
 
+import structlog
+
+from ....claude.facade import ClaudeIntegration as ClaudeFacade
+from ....claude.integration import ClaudeResponse, StreamUpdate
+from ....config.settings import Settings
 from ...base_provider import (
     AIMessage,
     AIResponse,
@@ -18,9 +22,6 @@ from ...base_provider import (
     ToolCall,
     ToolResult,
 )
-from ....claude.facade import ClaudeIntegration as ClaudeFacade
-from ....claude.integration import ClaudeResponse, StreamUpdate
-from ....config.settings import Settings
 
 logger = structlog.get_logger()
 

@@ -96,9 +96,7 @@ class TestStreamUpdate:
         assert result is False or result is None  # Handle both cases
 
         metadata_error = StreamUpdate(
-            type="assistant",
-            content="Test",
-            metadata={"is_error": True}
+            type="assistant", content="Test", metadata={"is_error": True}
         )
         assert metadata_error.is_error() is True
 
@@ -121,8 +119,7 @@ class TestStreamUpdate:
     def test_stream_update_get_progress_percentage(self):
         """Test get_progress_percentage method."""
         update = StreamUpdate(
-            type="progress",
-            progress={"percentage": 75, "step": 3, "total_steps": 4}
+            type="progress", progress={"percentage": 75, "step": 3, "total_steps": 4}
         )
         assert update.get_progress_percentage() == 75
 
@@ -134,8 +131,7 @@ class TestStreamUpdate:
     def test_stream_update_get_error_message(self):
         """Test get_error_message method."""
         error_update = StreamUpdate(
-            type="error",
-            error_info={"message": "Something went wrong"}
+            type="error", error_info={"message": "Something went wrong"}
         )
         assert error_update.get_error_message() == "Something went wrong"
 

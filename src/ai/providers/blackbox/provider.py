@@ -7,13 +7,15 @@ uses HTTP requests to their service. For production use, wait for official API
 or use their web interface.
 """
 
-import structlog
-import json
 import asyncio
+import json
 from pathlib import Path
 from typing import AsyncIterator, Optional
-import aiohttp
 
+import aiohttp
+import structlog
+
+from ....config.settings import Settings
 from ...base_provider import (
     AIMessage,
     AIResponse,
@@ -22,7 +24,6 @@ from ...base_provider import (
     ProviderCapabilities,
     ProviderStatus,
 )
-from ....config.settings import Settings
 
 logger = structlog.get_logger()
 
@@ -68,17 +69,14 @@ class BlackboxProvider(BaseAIProvider):
             # Check if Blackbox is accessible
             try:
                 async with self._session.get(
-                    "https://www.blackbox.ai",
-                    timeout=aiohttp.ClientTimeout(total=10)
+                    "https://www.blackbox.ai", timeout=aiohttp.ClientTimeout(total=10)
                 ) as response:
                     if response.status == 200:
                         self.status = ProviderStatus.READY
                         logger.info("Blackbox provider initialized successfully")
                         return True
                     else:
-                        logger.warning(
-                            f"Blackbox returned status {response.status}"
-                        )
+                        logger.warning(f"Blackbox returned status {response.status}")
                         self.status = ProviderStatus.OFFLINE
                         return False
 
@@ -122,20 +120,13 @@ class BlackboxProvider(BaseAIProvider):
 
         try:
             # Build context-aware prompt
-            full_prompt = self._build_prompt(
-                prompt, working_directory, system_prompt
-            )
+            full_prompt = self._build_prompt(prompt, working_directory, system_prompt)
 
             # Prepare request payload
             # Note: This is based on reverse-engineering Blackbox's web interface
             # May need updates if their API changes
             payload = {
-                "messages": [
-                    {
-                        "role": "user",
-                        "content": full_prompt
-                    }
-                ],
+                "messages": [{"role": "user", "content": full_prompt}],
                 "previewToken": None,
                 "codeModelMode": True,  # Enable code-focused mode
                 "agentMode": {},
@@ -153,7 +144,7 @@ class BlackboxProvider(BaseAIProvider):
                     "Content-Type": "application/json",
                     "User-Agent": "Mozilla/5.0 (compatible; ClaudeCodeBot/1.0)",
                 },
-                timeout=aiohttp.ClientTimeout(total=60)
+                timeout=aiohttp.ClientTimeout(total=60),
             ) as response:
                 if response.status != 200:
                     raise RuntimeError(
@@ -293,8 +284,7 @@ class BlackboxProvider(BaseAIProvider):
 
             # Quick connectivity check
             async with self._session.get(
-                "https://www.blackbox.ai",
-                timeout=aiohttp.ClientTimeout(total=5)
+                "https://www.blackbox.ai", timeout=aiohttp.ClientTimeout(total=5)
             ) as response:
                 return response.status == 200
 

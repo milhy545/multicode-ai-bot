@@ -91,7 +91,9 @@ class TestHandleCallbackQuery:
             mock_handler.assert_called_once()
 
     @pytest.mark.asyncio
-    async def test_callback_query_routing_action(self, mock_callback_query, mock_context):
+    async def test_callback_query_routing_action(
+        self, mock_callback_query, mock_context
+    ):
         """Test routing to action handler."""
         mock_callback_query.data = "action:help"
 
@@ -166,7 +168,10 @@ class TestHandleCdCallback:
         await handle_cd_callback(mock_callback_query, "project1", mock_context)
 
         # Verify directory changed
-        assert mock_context.user_data["current_directory"] == temp_approved_dir / "project1"
+        assert (
+            mock_context.user_data["current_directory"]
+            == temp_approved_dir / "project1"
+        )
         # Verify session cleared
         assert mock_context.user_data.get("claude_session_id") is None
 
@@ -198,7 +203,9 @@ class TestHandleCdCallback:
         assert mock_context.user_data["current_directory"] == temp_approved_dir
 
     @pytest.mark.asyncio
-    async def test_cd_callback_security_blocked(self, mock_callback_query, mock_context):
+    async def test_cd_callback_security_blocked(
+        self, mock_callback_query, mock_context
+    ):
         """Test security validation blocks malicious path."""
         # Mock security validator to reject
         validator = mock_context.bot_data["security_validator"]
@@ -313,7 +320,9 @@ class TestHandleActionCallback:
     @pytest.mark.asyncio
     async def test_action_unknown(self, mock_callback_query, mock_context):
         """Test unknown action."""
-        await handle_action_callback(mock_callback_query, "unknown_action", mock_context)
+        await handle_action_callback(
+            mock_callback_query, "unknown_action", mock_context
+        )
 
         # Verify unknown action message
         call_args = mock_callback_query.edit_message_text.call_args
@@ -433,9 +442,7 @@ class TestHandleQuickActionCallback:
         """Test quick action when not available."""
         mock_context.bot_data["quick_actions"] = None
 
-        await handle_quick_action_callback(
-            mock_callback_query, "test", mock_context
-        )
+        await handle_quick_action_callback(mock_callback_query, "test", mock_context)
 
         # Verify error message
         call_args = mock_callback_query.edit_message_text.call_args
@@ -447,9 +454,7 @@ class TestHandleQuickActionCallback:
         mock_context.bot_data["quick_actions"] = Mock()
         mock_context.bot_data["claude_integration"] = None
 
-        await handle_quick_action_callback(
-            mock_callback_query, "test", mock_context
-        )
+        await handle_quick_action_callback(mock_callback_query, "test", mock_context)
 
         # Verify error message
         call_args = mock_callback_query.edit_message_text.call_args
@@ -477,9 +482,7 @@ class TestHandleQuickActionCallback:
             mock_response
         )
 
-        await handle_quick_action_callback(
-            mock_callback_query, "test", mock_context
-        )
+        await handle_quick_action_callback(mock_callback_query, "test", mock_context)
 
         # Verify Claude was called
         mock_context.bot_data["claude_integration"].run_command.assert_called_once()
@@ -544,9 +547,7 @@ class TestHandleGitCallback:
         mock_git.get_status.assert_called_once()
 
     @pytest.mark.asyncio
-    async def test_git_diff(
-        self, mock_callback_query, mock_context, temp_approved_dir
-    ):
+    async def test_git_diff(self, mock_callback_query, mock_context, temp_approved_dir):
         """Test git diff callback."""
         features = mock_context.bot_data["features"]
         features.is_enabled.return_value = True
@@ -739,9 +740,7 @@ class TestHandleConversationCallback:
     @pytest.mark.asyncio
     async def test_conversation_unknown_action(self, mock_callback_query, mock_context):
         """Test unknown conversation action."""
-        await handle_conversation_callback(
-            mock_callback_query, "unknown", mock_context
-        )
+        await handle_conversation_callback(mock_callback_query, "unknown", mock_context)
 
         # Verify unknown action message
         call_args = mock_callback_query.edit_message_text.call_args
@@ -769,7 +768,10 @@ class TestCallbackIntegration:
 
         await handle_cd_callback(mock_callback_query, "project1", mock_context)
 
-        assert mock_context.user_data["current_directory"] == temp_approved_dir / "project1"
+        assert (
+            mock_context.user_data["current_directory"]
+            == temp_approved_dir / "project1"
+        )
 
         # 3. List files in project
         await handle_action_callback(mock_callback_query, "ls", mock_context)

@@ -17,6 +17,7 @@ from typing import Any, Dict, List, Optional
 import structlog
 
 from src.exceptions import SecurityError
+from src.storage.facade import Storage
 
 # from src.exceptions import AuthenticationError  # Future use
 
@@ -142,6 +143,40 @@ class InMemoryTokenStorage(TokenStorage):
     async def revoke_token(self, user_id: int) -> None:
         """Remove token from memory."""
         self._tokens.pop(user_id, None)
+
+
+class SQLiteTokenStorage(TokenStorage):
+    """SQLite-backed token storage."""
+
+    def __init__(self, storage: Storage) -> None:
+        self.storage = storage
+
+    async def store_token(
+        self, user_id: int, token_hash: str, expires_at: datetime
+    ) -> None:
+        """Store token hash in database."""
+        await self.storage.store_user_token(user_id, token_hash, expires_at)
+
+    async def get_user_token(self, user_id: int) -> Optional[Dict[str, Any]]:
+        """Get token data from database."""
+        token = await self.storage.get_user_token(user_id)
+        if not token or token.is_expired() or not token.is_active:
+            if token and token.is_expired():
+                await self.storage.revoke_user_token(user_id)
+            return None
+
+        if token.token_id is not None:
+            await self.storage.touch_user_token(token.token_id)
+
+        return {
+            "hash": token.token_hash,
+            "expires_at": token.expires_at or datetime.utcnow(),
+            "created_at": token.created_at,
+        }
+
+    async def revoke_token(self, user_id: int) -> None:
+        """Revoke token in database."""
+        await self.storage.revoke_user_token(user_id)
 
 
 class TokenAuthProvider(AuthProvider):

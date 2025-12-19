@@ -184,14 +184,23 @@ class FileHandler:
 
         # Check if text
         try:
-            with open(file_path, "r", encoding="utf-8") as f:
-                f.read(1024)  # Try reading first 1KB
+            with open(file_path, "rb") as f:
+                sample = f.read(1024)
+
+            if b"\x00" in sample:
+                return "binary"
+
+            sample.decode("utf-8")
             return "text"
         except (UnicodeDecodeError, IOError):
             return "binary"
 
     async def _process_archive(self, archive_path: Path, context: str) -> ProcessedFile:
         """Extract and analyze archive contents"""
+
+        max_total_size = 100 * 1024 * 1024  # 100MB total limit
+        max_file_size = 10 * 1024 * 1024  # 10MB per file
+        max_files = 2000
 
         # Create extraction directory
         extract_dir = self.temp_dir / f"extract_{uuid.uuid4()}"
@@ -201,13 +210,19 @@ class FileHandler:
             # Extract based on type
             if archive_path.suffix == ".zip":
                 with zipfile.ZipFile(archive_path) as zf:
+                    if len(zf.filelist) > max_files:
+                        raise ValueError("Archive contains too many files")
+
                     # Security check - prevent zip bombs
                     total_size = sum(f.file_size for f in zf.filelist)
-                    if total_size > 100 * 1024 * 1024:  # 100MB limit
+                    if total_size > max_total_size:
                         raise ValueError("Archive too large")
 
                     # Extract with security checks
                     for file_info in zf.filelist:
+                        if file_info.file_size > max_file_size:
+                            raise ValueError("Archive contains oversized file")
+
                         # Prevent path traversal
                         file_path = Path(file_info.filename)
                         if file_path.is_absolute() or ".." in file_path.parts:
@@ -225,15 +240,25 @@ class FileHandler:
 
             elif archive_path.suffix in {".tar", ".gz", ".bz2", ".xz"}:
                 with tarfile.open(archive_path) as tf:
+                    members = tf.getmembers()
+                    if len(members) > max_files:
+                        raise ValueError("Archive contains too many files")
+
                     # Security checks
-                    total_size = sum(member.size for member in tf.getmembers())
-                    if total_size > 100 * 1024 * 1024:  # 100MB limit
+                    total_size = sum(member.size for member in members)
+                    if total_size > max_total_size:
                         raise ValueError("Archive too large")
 
                     # Extract with security checks
-                    for member in tf.getmembers():
+                    for member in members:
+                        if member.size > max_file_size:
+                            raise ValueError("Archive contains oversized file")
+
                         # Prevent path traversal
                         if member.name.startswith("/") or ".." in member.name:
+                            continue
+
+                        if member.islnk() or member.issym():
                             continue
 
                         tf.extract(member, extract_dir)

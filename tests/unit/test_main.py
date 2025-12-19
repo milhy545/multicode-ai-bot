@@ -66,9 +66,7 @@ class TestSetupLogging:
         processors = config["processors"]
 
         # Verify JSON renderer is in processors (last one)
-        assert any(
-            isinstance(p, structlog.processors.JSONRenderer) for p in processors
-        )
+        assert any(isinstance(p, structlog.processors.JSONRenderer) for p in processors)
 
     def test_logging_processors_debug(self):
         """Test that debug logging uses console renderer."""
@@ -149,18 +147,14 @@ class TestCreateApplication:
     @pytest.mark.asyncio
     async def test_create_application_success(self, mock_config):
         """Test successful application creation."""
-        with patch("src.main.Storage") as mock_storage_class, patch(
-            "src.main.ClaudeCodeBot"
-        ) as mock_bot_class, patch(
-            "src.main.ClaudeIntegration"
-        ) as mock_integration_class, patch(
-            "src.main.ClaudeProcessManager"
-        ) as mock_process_manager_class, patch(
-            "src.main.SessionManager"
-        ) as mock_session_manager_class, patch(
-            "src.main.SQLiteSessionStorage"
-        ) as mock_session_storage_class, patch(
-            "src.main.ToolMonitor"
+        with (
+            patch("src.main.Storage") as mock_storage_class,
+            patch("src.main.ClaudeCodeBot") as mock_bot_class,
+            patch("src.main.ClaudeIntegration") as mock_integration_class,
+            patch("src.main.ClaudeProcessManager") as mock_process_manager_class,
+            patch("src.main.SessionManager") as mock_session_manager_class,
+            patch("src.main.SQLiteSessionStorage") as mock_session_storage_class,
+            patch("src.main.ToolMonitor"),
         ):
             # Setup mocks
             mock_storage = AsyncMock()
@@ -204,16 +198,14 @@ class TestCreateApplication:
         mock_config.enable_token_auth = True
         mock_config.auth_token_secret = "test_secret_key_123"
 
-        with patch("src.main.Storage") as mock_storage_class, patch(
-            "src.main.ClaudeCodeBot"
-        ), patch("src.main.ClaudeIntegration"), patch(
-            "src.main.ClaudeProcessManager"
-        ), patch(
-            "src.main.SessionManager"
-        ), patch(
-            "src.main.SQLiteSessionStorage"
-        ), patch(
-            "src.main.ToolMonitor"
+        with (
+            patch("src.main.Storage") as mock_storage_class,
+            patch("src.main.ClaudeCodeBot"),
+            patch("src.main.ClaudeIntegration"),
+            patch("src.main.ClaudeProcessManager"),
+            patch("src.main.SessionManager"),
+            patch("src.main.SQLiteSessionStorage"),
+            patch("src.main.ToolMonitor"),
         ):
             mock_storage = AsyncMock()
             mock_storage.initialize = AsyncMock()
@@ -232,16 +224,14 @@ class TestCreateApplication:
         mock_config.enable_token_auth = False
         mock_config.development_mode = True
 
-        with patch("src.main.Storage") as mock_storage_class, patch(
-            "src.main.ClaudeCodeBot"
-        ), patch("src.main.ClaudeIntegration"), patch(
-            "src.main.ClaudeProcessManager"
-        ), patch(
-            "src.main.SessionManager"
-        ), patch(
-            "src.main.SQLiteSessionStorage"
-        ), patch(
-            "src.main.ToolMonitor"
+        with (
+            patch("src.main.Storage") as mock_storage_class,
+            patch("src.main.ClaudeCodeBot"),
+            patch("src.main.ClaudeIntegration"),
+            patch("src.main.ClaudeProcessManager"),
+            patch("src.main.SessionManager"),
+            patch("src.main.SQLiteSessionStorage"),
+            patch("src.main.ToolMonitor"),
         ):
             mock_storage = AsyncMock()
             mock_storage.initialize = AsyncMock()
@@ -274,16 +264,14 @@ class TestCreateApplication:
         """Test application creation with SDK integration."""
         mock_config.use_sdk = True
 
-        with patch("src.main.Storage") as mock_storage_class, patch(
-            "src.main.ClaudeCodeBot"
-        ), patch("src.main.ClaudeIntegration"), patch(
-            "src.main.ClaudeSDKManager"
-        ) as mock_sdk_manager_class, patch(
-            "src.main.SessionManager"
-        ), patch(
-            "src.main.SQLiteSessionStorage"
-        ), patch(
-            "src.main.ToolMonitor"
+        with (
+            patch("src.main.Storage") as mock_storage_class,
+            patch("src.main.ClaudeCodeBot"),
+            patch("src.main.ClaudeIntegration"),
+            patch("src.main.ClaudeSDKManager") as mock_sdk_manager_class,
+            patch("src.main.SessionManager"),
+            patch("src.main.SQLiteSessionStorage"),
+            patch("src.main.ToolMonitor"),
         ):
             mock_storage = AsyncMock()
             mock_storage.initialize = AsyncMock()
@@ -428,17 +416,14 @@ class TestMain:
     async def test_main_success(self, tmp_path):
         """Test successful main execution."""
         # Need to patch at module level where main() imports it
-        with patch("src.main.parse_args") as mock_parse_args, patch(
-            "src.main.setup_logging"
-        ) as mock_setup_logging, patch(
-            "src.config.load_config"
-        ) as mock_load_config, patch(
-            "src.config.FeatureFlags"
-        ) as mock_feature_flags, patch(
-            "src.main.create_application"
-        ) as mock_create_app, patch(
-            "src.main.run_application"
-        ) as mock_run_app:
+        with (
+            patch("src.main.parse_args") as mock_parse_args,
+            patch("src.main.setup_logging") as mock_setup_logging,
+            patch("src.config.load_config") as mock_load_config,
+            patch("src.config.FeatureFlags") as mock_feature_flags,
+            patch("src.main.create_application") as mock_create_app,
+            patch("src.main.run_application") as mock_run_app,
+        ):
             # Setup mocks
             mock_args = Mock()
             mock_args.debug = False
@@ -472,11 +457,12 @@ class TestMain:
     @pytest.mark.asyncio
     async def test_main_configuration_error(self):
         """Test main handles ConfigurationError."""
-        with patch("src.main.parse_args") as mock_parse_args, patch(
-            "src.main.setup_logging"
-        ), patch("src.main.load_config") as mock_load_config, patch(
-            "sys.exit"
-        ) as mock_exit:
+        with (
+            patch("src.main.parse_args") as mock_parse_args,
+            patch("src.main.setup_logging"),
+            patch("src.main.load_config") as mock_load_config,
+            patch("sys.exit") as mock_exit,
+        ):
             mock_args = Mock()
             mock_args.debug = False
             mock_args.config_file = None
@@ -492,11 +478,12 @@ class TestMain:
     @pytest.mark.asyncio
     async def test_main_unexpected_error(self):
         """Test main handles unexpected errors."""
-        with patch("src.main.parse_args") as mock_parse_args, patch(
-            "src.main.setup_logging"
-        ), patch("src.main.load_config") as mock_load_config, patch(
-            "sys.exit"
-        ) as mock_exit:
+        with (
+            patch("src.main.parse_args") as mock_parse_args,
+            patch("src.main.setup_logging"),
+            patch("src.main.load_config") as mock_load_config,
+            patch("sys.exit") as mock_exit,
+        ):
             mock_args = Mock()
             mock_args.debug = False
             mock_args.config_file = None
@@ -512,16 +499,13 @@ class TestMain:
     @pytest.mark.asyncio
     async def test_main_debug_mode(self):
         """Test main with debug mode enabled."""
-        with patch("src.main.parse_args") as mock_parse_args, patch(
-            "src.main.setup_logging"
-        ) as mock_setup_logging, patch(
-            "src.config.load_config"
-        ) as mock_load_config, patch(
-            "src.config.FeatureFlags"
-        ), patch(
-            "src.main.create_application"
-        ), patch(
-            "src.main.run_application"
+        with (
+            patch("src.main.parse_args") as mock_parse_args,
+            patch("src.main.setup_logging") as mock_setup_logging,
+            patch("src.config.load_config") as mock_load_config,
+            patch("src.config.FeatureFlags"),
+            patch("src.main.create_application"),
+            patch("src.main.run_application"),
         ):
             mock_args = Mock()
             mock_args.debug = True
@@ -550,9 +534,11 @@ class TestRun:
 
     def test_run_keyboard_interrupt(self):
         """Test run handles keyboard interrupt gracefully."""
-        with patch("asyncio.run") as mock_asyncio_run, patch(
-            "sys.exit"
-        ) as mock_exit, patch("builtins.print") as mock_print:
+        with (
+            patch("asyncio.run") as mock_asyncio_run,
+            patch("sys.exit") as mock_exit,
+            patch("builtins.print") as mock_print,
+        ):
             mock_asyncio_run.side_effect = KeyboardInterrupt()
 
             run()

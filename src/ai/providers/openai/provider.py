@@ -9,12 +9,14 @@ For production use:
 3. Set OPENAI_API_KEY in environment
 """
 
-import structlog
-from pathlib import Path
-from typing import AsyncIterator, Optional, List, Dict, Any
-import aiohttp
 import json
+from pathlib import Path
+from typing import Any, AsyncIterator, Dict, List, Optional
 
+import aiohttp
+import structlog
+
+from ....config.settings import Settings
 from ...base_provider import (
     AIMessage,
     AIResponse,
@@ -24,7 +26,6 @@ from ...base_provider import (
     ProviderStatus,
     ToolCall,
 )
-from ....config.settings import Settings
 
 logger = structlog.get_logger()
 
@@ -80,9 +81,7 @@ class OpenAIProvider(BaseAIProvider):
                 return False
 
             # Get model preference
-            self._model = getattr(
-                self._config, "openai_model", "gpt-4-turbo-preview"
-            )
+            self._model = getattr(self._config, "openai_model", "gpt-4-turbo-preview")
 
             # Create aiohttp session
             self._session = aiohttp.ClientSession(
@@ -138,14 +137,16 @@ class OpenAIProvider(BaseAIProvider):
                 messages.append({"role": "system", "content": system_prompt})
             else:
                 # Default system prompt for coding
-                messages.append({
-                    "role": "system",
-                    "content": (
-                        f"You are an expert coding assistant. "
-                        f"Working directory: {working_directory}\n"
-                        f"Provide high-quality, well-documented code that follows best practices."
-                    ),
-                })
+                messages.append(
+                    {
+                        "role": "system",
+                        "content": (
+                            f"You are an expert coding assistant. "
+                            f"Working directory: {working_directory}\n"
+                            f"Provide high-quality, well-documented code that follows best practices."
+                        ),
+                    }
+                )
 
             # Add user message
             messages.append({"role": "user", "content": prompt})
@@ -271,10 +272,12 @@ class OpenAIProvider(BaseAIProvider):
             if system_prompt:
                 messages.append({"role": "system", "content": system_prompt})
             else:
-                messages.append({
-                    "role": "system",
-                    "content": f"You are an expert coding assistant. Working directory: {working_directory}",
-                })
+                messages.append(
+                    {
+                        "role": "system",
+                        "content": f"You are an expert coding assistant. Working directory: {working_directory}",
+                    }
+                )
             messages.append({"role": "user", "content": prompt})
 
             # Prepare streaming request

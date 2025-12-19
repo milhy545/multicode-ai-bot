@@ -117,7 +117,7 @@ class SessionExporter:
         lines.append(f"**Created:** {session['created_at']}")
         if session.get("updated_at"):
             lines.append(f"**Last Updated:** {session['updated_at']}")
-        lines.append(f"**Message Count:** {len(messages)}")
+        lines.append(f"Message Count: {len(messages)}")
         lines.append("\n---\n")
 
         # Messages
@@ -272,31 +272,48 @@ class SessionExporter:
         Returns:
             HTML content
         """
-        html = markdown
-
-        # Headers
-        html = html.replace("# ", "<h1>").replace("\n\n", "</h1>\n\n", 1)
-        html = html.replace("### ", "<h3>").replace("\n", "</h3>\n", 3)
-
-        # Bold
+        import html as html_lib
         import re
 
-        html = re.sub(r"\*\*([^*]+)\*\*", r"<strong>\1</strong>", html)
+        def format_inline(text: str) -> str:
+            escaped = html_lib.escape(text, quote=True)
+            escaped = re.sub(r"\*\*([^*]+)\*\*", r"<strong>\1</strong>", escaped)
+            escaped = re.sub(r"`([^`]+)`", r"<code>\1</code>", escaped)
+            return escaped
 
-        # Code blocks
-        html = re.sub(r"`([^`]+)`", r"<code>\1</code>", html)
+        lines = markdown.splitlines()
+        html_lines = []
+        paragraph_lines = []
 
-        # Line breaks and paragraphs
-        html = html.replace("\n\n", "</p>\n<p>")
-        html = f"<p>{html}</p>"
+        def flush_paragraph() -> None:
+            if not paragraph_lines:
+                return
+            content = "<br>".join(paragraph_lines)
+            html_lines.append(f"<p>{content}</p>")
+            paragraph_lines.clear()
 
-        # Clean up empty paragraphs
-        html = html.replace("<p></p>", "")
-        html = html.replace("<p><h", "<h")
-        html = html.replace("</h1></p>", "</h1>")
-        html = html.replace("</h3></p>", "</h3>")
+        for line in lines:
+            stripped = line.strip()
+            if not stripped:
+                flush_paragraph()
+                continue
 
-        # Horizontal rules
-        html = html.replace("<p>---</p>", "<hr>")
+            if stripped == "---":
+                flush_paragraph()
+                html_lines.append("<hr>")
+                continue
 
-        return html
+            if line.startswith("### "):
+                flush_paragraph()
+                html_lines.append(f"<h3>{format_inline(line[4:])}</h3>")
+                continue
+
+            if line.startswith("# "):
+                flush_paragraph()
+                html_lines.append(f"<h1>{format_inline(line[2:])}</h1>")
+                continue
+
+            paragraph_lines.append(format_inline(line))
+
+        flush_paragraph()
+        return "\n".join(html_lines)

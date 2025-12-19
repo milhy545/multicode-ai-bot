@@ -74,9 +74,7 @@ class TestValidateMessageContent:
             assert is_safe is False
             assert violation == "Command injection attempt"
             mock_audit_logger.log_security_violation.assert_called_once()
-            call_kwargs = (
-                mock_audit_logger.log_security_violation.call_args.kwargs
-            )
+            call_kwargs = mock_audit_logger.log_security_violation.call_args.kwargs
             assert call_kwargs["user_id"] == 12345
             assert call_kwargs["violation_type"] == "command_injection_attempt"
             assert call_kwargs["severity"] == "high"
@@ -106,9 +104,7 @@ class TestValidateMessageContent:
             assert is_safe is False
             assert violation == "Path traversal attempt"
             mock_audit_logger.log_security_violation.assert_called_once()
-            call_kwargs = (
-                mock_audit_logger.log_security_violation.call_args.kwargs
-            )
+            call_kwargs = mock_audit_logger.log_security_violation.call_args.kwargs
             assert call_kwargs["user_id"] == 12345
             assert call_kwargs["violation_type"] == "path_traversal_attempt"
             assert call_kwargs["severity"] == "high"
@@ -138,9 +134,7 @@ class TestValidateMessageContent:
             assert is_safe is False
             assert violation == "Suspicious URL detected"
             mock_audit_logger.log_security_violation.assert_called_once()
-            call_kwargs = (
-                mock_audit_logger.log_security_violation.call_args.kwargs
-            )
+            call_kwargs = mock_audit_logger.log_security_violation.call_args.kwargs
             assert call_kwargs["user_id"] == 12345
             assert call_kwargs["violation_type"] == "suspicious_url"
             assert call_kwargs["severity"] == "medium"
@@ -298,9 +292,7 @@ class TestValidateFileUpload:
             assert is_safe is False
             assert "File type not allowed" in error
             mock_audit_logger.log_security_violation.assert_called_once()
-            call_kwargs = (
-                mock_audit_logger.log_security_violation.call_args.kwargs
-            )
+            call_kwargs = mock_audit_logger.log_security_violation.call_args.kwargs
             assert call_kwargs["violation_type"] == "dangerous_mime_type"
             assert call_kwargs["severity"] == "high"
 
@@ -662,7 +654,9 @@ class TestThreatDetectionMiddleware:
         assert call_kwargs["violation_type"] == "reconnaissance_attempt"
         assert call_kwargs["severity"] == "high"
 
-    async def test_threat_detection_without_audit_logger(self, mock_event, mock_handler):
+    async def test_threat_detection_without_audit_logger(
+        self, mock_event, mock_handler
+    ):
         """Test threat detection without audit logger."""
         data = {}
 

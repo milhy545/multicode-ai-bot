@@ -127,72 +127,65 @@ class Settings(BaseSettings):
 
     # Multi-AI Provider Settings
     default_ai_provider: str = Field(
-        "claude",
-        description="Default AI provider (claude, gemini, copilot, etc.)"
+        "claude", description="Default AI provider (claude, gemini, copilot, etc.)"
     )
     enabled_ai_providers: List[str] = Field(
-        default=["claude"],
-        description="List of enabled AI providers"
+        default=["claude"], description="List of enabled AI providers"
     )
 
     # Gemini settings
     gemini_api_key: Optional[SecretStr] = Field(
         None,
-        description="Google Gemini API key (get from https://aistudio.google.com/)"
+        description="Google Gemini API key (get from https://aistudio.google.com/)",
     )
     gemini_model: str = Field(
-        "gemini-1.5-pro-latest",
-        description="Gemini model to use"
+        "gemini-1.5-pro-latest", description="Gemini model to use"
     )
 
     # Codeium/Windsurf settings
     codeium_api_key: Optional[SecretStr] = Field(
         None,
-        description="Codeium API key for Windsurf provider (get from https://codeium.com/)"
+        description="Codeium API key for Windsurf provider (get from https://codeium.com/)",
     )
 
     # OpenAI settings
     openai_api_key: Optional[SecretStr] = Field(
         None,
-        description="OpenAI API key (get from https://platform.openai.com/api-keys)"
+        description="OpenAI API key (get from https://platform.openai.com/api-keys)",
     )
     openai_model: str = Field(
         "gpt-4-turbo-preview",
-        description="OpenAI model to use (gpt-4-turbo-preview, gpt-4, gpt-3.5-turbo)"
+        description="OpenAI model to use (gpt-4-turbo-preview, gpt-4, gpt-3.5-turbo)",
     )
     openai_org_id: Optional[str] = Field(
-        None,
-        description="OpenAI organization ID (optional)"
+        None, description="OpenAI organization ID (optional)"
     )
 
     # Ollama settings (local models)
     ollama_host: str = Field(
-        "http://localhost:11434",
-        description="Ollama server host URL"
+        "http://localhost:11434", description="Ollama server host URL"
     )
     ollama_model: str = Field(
         "codellama",
-        description="Ollama model to use (codellama, llama2, mistral, deepseek-coder, etc.)"
+        description="Ollama model to use (codellama, llama2, mistral, deepseek-coder, etc.)",
     )
 
     # DeepSeek settings
     deepseek_api_key: Optional[SecretStr] = Field(
-        None,
-        description="DeepSeek API key (get from https://platform.deepseek.com/)"
+        None, description="DeepSeek API key (get from https://platform.deepseek.com/)"
     )
     deepseek_model: str = Field(
         "deepseek-coder",
-        description="DeepSeek model to use (deepseek-coder, deepseek-chat)"
+        description="DeepSeek model to use (deepseek-coder, deepseek-chat)",
     )
 
     # Groq settings
     groq_api_key: Optional[SecretStr] = Field(
-        None,
-        description="Groq API key (get from https://console.groq.com/)"
+        None, description="Groq API key (get from https://console.groq.com/)"
     )
     groq_model: str = Field(
         "llama3-70b-8192",
-        description="Groq model to use (llama3-70b-8192, mixtral-8x7b-32768, gemma-7b-it)"
+        description="Groq model to use (llama3-70b-8192, mixtral-8x7b-32768, gemma-7b-it)",
     )
 
     # Features

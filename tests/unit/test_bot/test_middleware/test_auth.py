@@ -124,9 +124,7 @@ class TestAuthMiddleware:
         mock_auth_manager.refresh_session.assert_called_once_with(12345)
         mock_handler.assert_called_once_with(mock_event, mock_data)
 
-    async def test_authenticated_user_without_username(
-        self, mock_handler, mock_data
-    ):
+    async def test_authenticated_user_without_username(self, mock_handler, mock_data):
         """Test authenticated user without username attribute."""
         event = MagicMock()
         event.effective_user = MagicMock()
@@ -445,7 +443,9 @@ class TestAdminRequiredMiddleware:
         auth_manager = MagicMock()
         auth_manager.is_authenticated.return_value = True
         mock_session = MagicMock()
-        mock_session.user_info = {"name": "test"}  # Has user_info but no permissions key
+        mock_session.user_info = {
+            "name": "test"
+        }  # Has user_info but no permissions key
         auth_manager.get_session.return_value = mock_session
         data = {"auth_manager": auth_manager}
 

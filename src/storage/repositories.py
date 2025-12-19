@@ -20,6 +20,7 @@ from .models import (
     SessionModel,
     ToolUsageModel,
     UserModel,
+    UserTokenModel,
 )
 
 logger = structlog.get_logger()
@@ -448,6 +449,125 @@ class AuditLogRepository:
             )
             rows = await cursor.fetchall()
             return [AuditLogModel.from_row(row) for row in rows]
+
+    async def get_audit_events(
+        self,
+        user_id: Optional[int] = None,
+        event_type: Optional[str] = None,
+        start_time: Optional[datetime] = None,
+        end_time: Optional[datetime] = None,
+        limit: int = 100,
+    ) -> List[AuditLogModel]:
+        """Get audit events with optional filters."""
+        conditions = []
+        params: List[object] = []
+
+        if user_id is not None:
+            conditions.append("user_id = ?")
+            params.append(user_id)
+
+        if event_type is not None:
+            conditions.append("event_type = ?")
+            params.append(event_type)
+
+        if start_time is not None:
+            conditions.append("timestamp >= ?")
+            params.append(start_time)
+
+        if end_time is not None:
+            conditions.append("timestamp <= ?")
+            params.append(end_time)
+
+        where_clause = ""
+        if conditions:
+            where_clause = "WHERE " + " AND ".join(conditions)
+
+        params.append(limit)
+
+        query = f"""
+            SELECT * FROM audit_log
+            {where_clause}
+            ORDER BY timestamp DESC
+            LIMIT ?
+        """
+
+        async with self.db.get_connection() as conn:
+            cursor = await conn.execute(query, tuple(params))
+            rows = await cursor.fetchall()
+            return [AuditLogModel.from_row(row) for row in rows]
+
+
+class UserTokenRepository:
+    """User token data access."""
+
+    def __init__(self, db_manager: DatabaseManager):
+        """Initialize repository."""
+        self.db = db_manager
+
+    async def store_token(self, token: UserTokenModel) -> UserTokenModel:
+        """Store a new user token."""
+        async with self.db.get_connection() as conn:
+            cursor = await conn.execute(
+                """
+                INSERT INTO user_tokens (
+                    user_id,
+                    token_hash,
+                    created_at,
+                    expires_at,
+                    last_used,
+                    is_active
+                )
+                VALUES (?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    token.user_id,
+                    token.token_hash,
+                    token.created_at,
+                    token.expires_at,
+                    token.last_used,
+                    token.is_active,
+                ),
+            )
+            await conn.commit()
+            token.token_id = cursor.lastrowid
+            return token
+
+    async def get_user_token(self, user_id: int) -> Optional[UserTokenModel]:
+        """Get active token for a user."""
+        async with self.db.get_connection() as conn:
+            cursor = await conn.execute(
+                """
+                SELECT * FROM user_tokens
+                WHERE user_id = ? AND is_active = TRUE
+                ORDER BY created_at DESC
+                LIMIT 1
+                """,
+                (user_id,),
+            )
+            row = await cursor.fetchone()
+            return UserTokenModel.from_row(row) if row else None
+
+    async def revoke_token(self, user_id: int) -> None:
+        """Deactivate tokens for a user."""
+        async with self.db.get_connection() as conn:
+            await conn.execute(
+                """
+                UPDATE user_tokens
+                SET is_active = FALSE
+                WHERE user_id = ?
+                """,
+                (user_id,),
+            )
+            await conn.commit()
+
+    async def update_last_used(self, token_id: int) -> None:
+        """Update last_used timestamp for a token."""
+        async with self.db.get_connection() as conn:
+            await conn.execute(
+                "UPDATE user_tokens SET last_used = ? WHERE token_id = ?",
+                (datetime.utcnow(), token_id),
+            )
+            await conn.commit()
 
 
 class CostTrackingRepository:

@@ -9,13 +9,15 @@ For production use:
 3. Set CODEIUM_API_KEY in environment
 """
 
-import structlog
-import json
 import asyncio
+import json
 from pathlib import Path
 from typing import AsyncIterator, Optional
-import aiohttp
 
+import aiohttp
+import structlog
+
+from ....config.settings import Settings
 from ...base_provider import (
     AIMessage,
     AIResponse,
@@ -24,7 +26,6 @@ from ...base_provider import (
     ProviderCapabilities,
     ProviderStatus,
 )
-from ....config.settings import Settings
 
 logger = structlog.get_logger()
 
@@ -121,9 +122,7 @@ class WindsurfProvider(BaseAIProvider):
 
         try:
             # Build context-aware prompt
-            full_prompt = self._build_prompt(
-                prompt, working_directory, system_prompt
-            )
+            full_prompt = self._build_prompt(prompt, working_directory, system_prompt)
 
             # Prepare request payload for Codeium API
             payload = {
@@ -134,15 +133,13 @@ class WindsurfProvider(BaseAIProvider):
                 "metadata": {
                     "working_directory": str(working_directory),
                     "session_id": session_id,
-                }
+                },
             }
 
             # Send request to Codeium
             try:
                 async with self._session.post(
-                    self._api_url,
-                    json=payload,
-                    timeout=aiohttp.ClientTimeout(total=60)
+                    self._api_url, json=payload, timeout=aiohttp.ClientTimeout(total=60)
                 ) as response:
                     if response.status == 401:
                         raise RuntimeError(
@@ -163,9 +160,7 @@ class WindsurfProvider(BaseAIProvider):
 
             except aiohttp.ClientError as e:
                 # Fallback to simulation mode if API not available
-                logger.warning(
-                    f"Codeium API error: {e}. Using simulation mode."
-                )
+                logger.warning(f"Codeium API error: {e}. Using simulation mode.")
                 content = self._simulate_response(prompt)
 
             # Estimate tokens (rough)
@@ -299,9 +294,12 @@ class WindsurfProvider(BaseAIProvider):
                 async with self._session.post(
                     self._api_url,
                     json={"prompt": "test", "max_tokens": 1},
-                    timeout=aiohttp.ClientTimeout(total=5)
+                    timeout=aiohttp.ClientTimeout(total=5),
                 ) as response:
-                    return response.status in [200, 401]  # 401 means API is up but key issue
+                    return response.status in [
+                        200,
+                        401,
+                    ]  # 401 means API is up but key issue
             except:
                 # If health check fails, provider might still work
                 return True  # Optimistic

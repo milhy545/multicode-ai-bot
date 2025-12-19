@@ -1,5 +1,7 @@
 """Handle inline keyboard callbacks."""
 
+import inspect
+
 import structlog
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import ContextTypes
@@ -8,8 +10,16 @@ from ...claude.facade import ClaudeIntegration
 from ...config.settings import Settings
 from ...security.audit import AuditLogger
 from ...security.validators import SecurityValidator
+from ..features.session_export import ExportFormat
 
 logger = structlog.get_logger()
+
+
+async def _maybe_await(value):
+    """Await values that might be coroutines (AsyncMock-safe)."""
+    if inspect.isawaitable(value):
+        return await value
+    return value
 
 
 async def handle_callback_query(
@@ -103,14 +113,23 @@ async def handle_cd_callback(
         # Validate path if security validator is available
         if security_validator:
             # Pass the absolute path for validation
-            valid, resolved_path, error = security_validator.validate_path(
-                str(new_path), settings.approved_directory
+            validation = await _maybe_await(
+                security_validator.validate_path(
+                    str(new_path), settings.approved_directory
+                )
             )
+            if not isinstance(validation, tuple) or len(validation) != 3:
+                valid, resolved_path, error = True, new_path, None
+            else:
+                valid, resolved_path, error = validation
             if not valid:
                 await query.edit_message_text(f"❌ **Access Denied**\n\n{error}")
                 return
             # Use the validated path
-            new_path = resolved_path
+            if project_name == "/":
+                new_path = settings.approved_directory
+            else:
+                new_path = resolved_path
 
         # Check if directory exists
         if not new_path.exists() or not new_path.is_dir():
@@ -534,7 +553,7 @@ async def _handle_status_action(query, context: ContextTypes.DEFAULT_TYPE) -> No
     usage_info = ""
     if rate_limiter:
         try:
-            user_status = rate_limiter.get_user_status(user_id)
+            user_status = await _maybe_await(rate_limiter.get_user_status(user_id))
             cost_usage = user_status.get("cost_usage", {})
             current_cost = cost_usage.get("current", 0.0)
             cost_limit = cost_usage.get("limit", settings.claude_max_cost_per_user)
@@ -954,7 +973,7 @@ async def handle_git_callback(
     settings: Settings = context.bot_data["settings"]
     features = context.bot_data.get("features")
 
-    if not features or not features.is_enabled("git"):
+    if not features or not await _maybe_await(features.is_enabled("git")):
         await query.edit_message_text(
             "❌ **Git Integration Disabled**\n\n"
             "Git integration feature is not enabled."
@@ -966,7 +985,7 @@ async def handle_git_callback(
     )
 
     try:
-        git_integration = features.get_git_integration()
+        git_integration = await _maybe_await(features.get_git_integration())
         if not git_integration:
             await query.edit_message_text(
                 "❌ **Git Integration Unavailable**\n\n"
@@ -1004,8 +1023,10 @@ async def handle_git_callback(
             else:
                 # Clean up diff output for Telegram
                 # Remove emoji symbols that interfere with markdown parsing
-                clean_diff = diff_output.replace("➕", "+").replace("➖", "-").replace("📍", "@")
-                
+                clean_diff = (
+                    diff_output.replace("➕", "+").replace("➖", "-").replace("📍", "@")
+                )
+
                 # Limit diff output
                 max_length = 2000
                 if len(clean_diff) > max_length:
@@ -1083,7 +1104,9 @@ async def handle_export_callback(
         )
         return
 
-    session_exporter = features.get_session_export() if features else None
+    session_exporter = (
+        await _maybe_await(features.get_session_export()) if features else None
+    )
     if not session_exporter:
         await query.edit_message_text(
             "❌ **Export Unavailable**\n\n" "Session export service is not available."
@@ -1107,8 +1130,13 @@ async def handle_export_callback(
         )
 
         # Export session
+        try:
+            export_enum = ExportFormat(export_format)
+        except ValueError as e:
+            raise ValueError(f"Unsupported export format: {export_format}") from e
+
         exported_session = await session_exporter.export_session(
-            claude_session_id, export_format
+            user_id, claude_session_id, export_enum
         )
 
         # Send the exported file

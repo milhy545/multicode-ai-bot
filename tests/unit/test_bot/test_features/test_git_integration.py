@@ -287,9 +287,7 @@ class TestPathValidation:
         traversal_path = temp_dir / "repo" / ".." / ".." / "etc"
 
         with pytest.raises(SecurityError):
-            await git_integration.execute_git_command(
-                ["git", "status"], traversal_path
-            )
+            await git_integration.execute_git_command(["git", "status"], traversal_path)
 
 
 class TestGitCommandExecution:
@@ -376,10 +374,7 @@ class TestGetStatus:
         """Test getting status with various changes."""
         with patch.object(git_integration, "execute_git_command") as mock_cmd:
             porcelain_output = (
-                " M modified.py\n"
-                "A  added.py\n"
-                " D deleted.py\n"
-                "?? untracked.py\n"
+                " M modified.py\n" "A  added.py\n" " D deleted.py\n" "?? untracked.py\n"
             )
             mock_cmd.side_effect = [
                 ("feature-branch\n", ""),
@@ -559,9 +554,7 @@ class TestGetFileHistory:
     ):
         """Test protection against path traversal in file history."""
         with pytest.raises(SecurityError, match="outside repository"):
-            await git_integration.get_file_history(
-                repo_path, "../../../etc/passwd"
-            )
+            await git_integration.get_file_history(repo_path, "../../../etc/passwd")
 
     @pytest.mark.asyncio
     async def test_get_file_history_binary_files(self, git_integration, repo_path):
@@ -570,8 +563,7 @@ class TestGetFileHistory:
         test_file.touch()
 
         log_output = (
-            "abc12345|Author|2024-01-01T12:00:00Z|Add image\n"
-            "-\t-\timage.png\n"
+            "abc12345|Author|2024-01-01T12:00:00Z|Add image\n" "-\t-\timage.png\n"
         )
 
         with patch.object(git_integration, "execute_git_command") as mock_cmd:

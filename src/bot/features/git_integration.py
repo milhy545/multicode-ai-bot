@@ -76,6 +76,16 @@ class GitIntegration:
         r"--receive-pack",
         r"-c\s*core\.gitProxy",
         r"-c\s*core\.sshCommand",
+        r";",
+        r"`",
+        r"\$\(",
+        r"\$\{",
+        r"\|\|",
+        r"\|",
+        r"&&",
+        r">",
+        r"<",
+        r"\x00",
     ]
 
     def __init__(self, settings: Settings):
@@ -85,7 +95,7 @@ class GitIntegration:
             settings: Application settings
         """
         self.settings = settings
-        self.approved_dir = Path(settings.approved_directory)
+        self.approved_dir = Path(settings.approved_directory).resolve()
 
     async def execute_git_command(
         self, command: List[str], cwd: Path
@@ -119,10 +129,11 @@ class GitIntegration:
         # Validate working directory
         try:
             cwd = cwd.resolve()
-            if not cwd.is_relative_to(self.approved_dir):
-                raise SecurityError("Repository outside approved directory")
-        except Exception:
-            raise SecurityError("Invalid repository path")
+        except Exception as e:
+            raise SecurityError("Invalid repository path") from e
+
+        if not cwd.is_relative_to(self.approved_dir):
+            raise SecurityError("Repository outside approved directory")
 
         # Execute command
         try:
@@ -171,8 +182,11 @@ class GitIntegration:
         deleted = []
         untracked = []
 
-        for line in status_out.strip().split("\n"):
+        for line in status_out.splitlines():
             if not line:
+                continue
+
+            if len(line) < 3:
                 continue
 
             status = line[:2]
@@ -200,7 +214,7 @@ class GitIntegration:
                 if len(parts) == 2:
                     ahead = int(parts[0])
                     behind = int(parts[1])
-        except GitError:
+        except Exception:
             # No upstream configured
             pass
 

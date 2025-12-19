@@ -92,11 +92,20 @@ def _apply_environment_overrides(settings: Settings, env: Optional[str]) -> Sett
 
     # Apply overrides
     for key, value in overrides.items():
-        if hasattr(settings, key):
-            setattr(settings, key, value)
-            logger.debug(
-                "Applied environment override", key=key, value=value, environment=env
-            )
+        if not hasattr(settings, key):
+            continue
+
+        env_var = key.upper()
+        if os.getenv(env_var) is not None:
+            continue
+
+        if key == "approved_directory":
+            continue
+
+        setattr(settings, key, value)
+        logger.debug(
+            "Applied environment override", key=key, value=value, environment=env
+        )
 
     return settings
 

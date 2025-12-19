@@ -323,7 +323,10 @@ class TestHandleTextMessage:
         # Verify audit log
         audit_logger = mock_context.bot_data["audit_logger"]
         audit_logger.log_command.assert_called_with(
-            user_id=123456789, command="text_message", args=["Hello Claude"], success=False
+            user_id=123456789,
+            command="text_message",
+            args=["Hello Claude"],
+            success=False,
         )
 
     @pytest.mark.asyncio
@@ -400,7 +403,9 @@ class TestHandleDocument:
     """Tests for handle_document handler."""
 
     @pytest.mark.asyncio
-    async def test_handle_document_success(self, mock_update, mock_context, mock_settings):
+    async def test_handle_document_success(
+        self, mock_update, mock_context, mock_settings
+    ):
         """Test successful document handling."""
         # Mock document
         document = Mock(spec=Document)

@@ -174,6 +174,7 @@ class TestValidateConfig:
         # Skip this test on systems where we can't set restrictive permissions
         # (e.g., when running as root in Docker)
         import os
+
         if os.geteuid() == 0:
             pytest.skip("Cannot test permission restrictions as root")
 
@@ -187,7 +188,9 @@ class TestValidateConfig:
         readable.chmod(0o000)
 
         try:
-            with pytest.raises(InvalidConfigError, match="Cannot access approved directory"):
+            with pytest.raises(
+                InvalidConfigError, match="Cannot access approved directory"
+            ):
                 _validate_config(config)
         finally:
             readable.chmod(0o755)
@@ -201,7 +204,7 @@ class TestValidateConfig:
         config = create_test_config(
             approved_directory=str(tmp_path),
             enable_mcp=True,
-            mcp_config_path=str(mcp_config)
+            mcp_config_path=str(mcp_config),
         )
 
         # Should not raise
@@ -224,7 +227,9 @@ class TestValidateConfig:
             approved_directory=str(tmp_path), rate_limit_requests=0
         )
 
-        with pytest.raises(InvalidConfigError, match="rate_limit_requests must be positive"):
+        with pytest.raises(
+            InvalidConfigError, match="rate_limit_requests must be positive"
+        ):
             _validate_config(config)
 
     def test_validate_config_negative_rate_limit_window(self, tmp_path):
@@ -233,7 +238,9 @@ class TestValidateConfig:
             approved_directory=str(tmp_path), rate_limit_window=0
         )
 
-        with pytest.raises(InvalidConfigError, match="rate_limit_window must be positive"):
+        with pytest.raises(
+            InvalidConfigError, match="rate_limit_window must be positive"
+        ):
             _validate_config(config)
 
     def test_validate_config_negative_timeout(self, tmp_path):
@@ -242,7 +249,9 @@ class TestValidateConfig:
             approved_directory=str(tmp_path), claude_timeout_seconds=-1
         )
 
-        with pytest.raises(InvalidConfigError, match="claude_timeout_seconds must be positive"):
+        with pytest.raises(
+            InvalidConfigError, match="claude_timeout_seconds must be positive"
+        ):
             _validate_config(config)
 
     def test_validate_config_negative_cost_limit(self, tmp_path):
@@ -251,7 +260,9 @@ class TestValidateConfig:
             approved_directory=str(tmp_path), claude_max_cost_per_user=-1
         )
 
-        with pytest.raises(InvalidConfigError, match="claude_max_cost_per_user must be positive"):
+        with pytest.raises(
+            InvalidConfigError, match="claude_max_cost_per_user must be positive"
+        ):
             _validate_config(config)
 
     def test_validate_config_sqlite_creates_parent_directory(self, tmp_path):

@@ -23,10 +23,10 @@ from src.config.features import FeatureFlags
 from src.config.loader import load_config
 from src.config.settings import Settings
 from src.exceptions import ConfigurationError
-from src.security.audit import AuditLogger, InMemoryAuditStorage
+from src.security.audit import AuditLogger, SQLiteAuditStorage
 from src.security.auth import (
     AuthenticationManager,
-    InMemoryTokenStorage,
+    SQLiteTokenStorage,
     TokenAuthProvider,
     WhitelistAuthProvider,
 )
@@ -107,7 +107,7 @@ async def create_application(config: Settings) -> Dict[str, Any]:
 
     # Add token provider if enabled
     if config.enable_token_auth:
-        token_storage = InMemoryTokenStorage()  # TODO: Use database storage
+        token_storage = SQLiteTokenStorage(storage)
         providers.append(TokenAuthProvider(config.auth_token_secret, token_storage))
 
     # Fall back to allowing all users in development mode
@@ -124,7 +124,7 @@ async def create_application(config: Settings) -> Dict[str, Any]:
     rate_limiter = RateLimiter(config)
 
     # Create audit storage and logger
-    audit_storage = InMemoryAuditStorage()  # TODO: Use database storage in production
+    audit_storage = SQLiteAuditStorage(storage)
     audit_logger = AuditLogger(audit_storage)
 
     # Create Claude integration components with persistent storage

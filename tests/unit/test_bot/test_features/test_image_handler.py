@@ -345,7 +345,9 @@ class TestImageProcessing:
         for image_data, expected_format in formats_to_test:
             photo = AsyncMock()
             mock_file = AsyncMock()
-            mock_file.download_as_bytearray = AsyncMock(return_value=bytearray(image_data))
+            mock_file.download_as_bytearray = AsyncMock(
+                return_value=bytearray(image_data)
+            )
             photo.get_file = AsyncMock(return_value=mock_file)
 
             result = await image_handler.process_image(photo)

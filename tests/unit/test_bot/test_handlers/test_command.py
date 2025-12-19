@@ -272,7 +272,9 @@ class TestListFiles:
     """Tests for list_files handler."""
 
     @pytest.mark.asyncio
-    async def test_list_files_success(self, mock_update, mock_context, temp_approved_dir):
+    async def test_list_files_success(
+        self, mock_update, mock_context, temp_approved_dir
+    ):
         """Test successful file listing."""
         await list_files(mock_update, mock_context)
 
@@ -348,16 +350,21 @@ class TestChangeDirectory:
 
         # Mock security validator - not async
         validator = mock_context.bot_data["security_validator"]
-        validator.validate_path = Mock(return_value=(
-            True,
-            temp_approved_dir / "project1",
-            None,
-        ))
+        validator.validate_path = Mock(
+            return_value=(
+                True,
+                temp_approved_dir / "project1",
+                None,
+            )
+        )
 
         await change_directory(mock_update, mock_context)
 
         # Verify directory was changed
-        assert mock_context.user_data.get("current_directory") == temp_approved_dir / "project1"
+        assert (
+            mock_context.user_data.get("current_directory")
+            == temp_approved_dir / "project1"
+        )
         # Verify session was cleared
         assert mock_context.user_data.get("claude_session_id") is None
 
@@ -385,11 +392,13 @@ class TestChangeDirectory:
 
         # Mock security validator to reject - not async
         validator = mock_context.bot_data["security_validator"]
-        validator.validate_path = Mock(return_value=(
-            False,
-            None,
-            "Path traversal attempt detected",
-        ))
+        validator.validate_path = Mock(
+            return_value=(
+                False,
+                None,
+                "Path traversal attempt detected",
+            )
+        )
 
         await change_directory(mock_update, mock_context)
 
@@ -410,11 +419,13 @@ class TestChangeDirectory:
 
         # Mock security validator to accept but directory doesn't exist
         validator = mock_context.bot_data["security_validator"]
-        validator.validate_path = Mock(return_value=(
-            True,
-            temp_approved_dir / "nonexistent",
-            None,
-        ))
+        validator.validate_path = Mock(
+            return_value=(
+                True,
+                temp_approved_dir / "nonexistent",
+                None,
+            )
+        )
 
         await change_directory(mock_update, mock_context)
 
@@ -449,7 +460,10 @@ class TestChangeDirectory:
         # Verify we're in parent directory (or root if we can't go up)
         # The code might keep us at root if we're already there
         current_dir = mock_context.user_data.get("current_directory")
-        assert current_dir == temp_approved_dir or current_dir == temp_approved_dir / "project1"
+        assert (
+            current_dir == temp_approved_dir
+            or current_dir == temp_approved_dir / "project1"
+        )
 
 
 class TestPrintWorkingDirectory:
@@ -504,6 +518,7 @@ class TestShowProjects:
         """Test when no projects exist."""
         # Remove all subdirectories and their contents
         import shutil
+
         for item in temp_approved_dir.iterdir():
             if item.is_dir():
                 shutil.rmtree(item)
@@ -556,13 +571,15 @@ class TestSessionStatus:
         assert "test_ses" in call_args[0][0] or "test_session" in call_args[0][0]
 
     @pytest.mark.asyncio
-    async def test_status_with_rate_limiter(self, mock_update, mock_context, mock_settings):
+    async def test_status_with_rate_limiter(
+        self, mock_update, mock_context, mock_settings
+    ):
         """Test status includes usage information."""
         # Mock rate limiter with a non-raising mock
         rate_limiter = Mock()
-        rate_limiter.get_user_status = Mock(return_value={
-            "cost_usage": {"current": 5.0, "limit": 10.0}
-        })
+        rate_limiter.get_user_status = Mock(
+            return_value={"cost_usage": {"current": 5.0, "limit": 10.0}}
+        )
         mock_context.bot_data["rate_limiter"] = rate_limiter
 
         await session_status(mock_update, mock_context)
@@ -682,10 +699,12 @@ class TestQuickActions:
 
         # Mock quick action manager
         mock_manager = AsyncMock()
-        mock_manager.get_suggestions = AsyncMock(return_value=[
-            {"id": "test", "name": "Test Action"}
-        ])
-        mock_manager.create_inline_keyboard = Mock(return_value=InlineKeyboardMarkup([]))
+        mock_manager.get_suggestions = AsyncMock(
+            return_value=[{"id": "test", "name": "Test Action"}]
+        )
+        mock_manager.create_inline_keyboard = Mock(
+            return_value=InlineKeyboardMarkup([])
+        )
         features.get_quick_actions = Mock(return_value=mock_manager)
         mock_context.bot_data["features"] = features
 

@@ -10,12 +10,14 @@ For production use:
 4. Optionally set OLLAMA_HOST (default: http://localhost:11434)
 """
 
-import structlog
+import json
 from pathlib import Path
 from typing import AsyncIterator, Optional
-import aiohttp
-import json
 
+import aiohttp
+import structlog
+
+from ....config.settings import Settings
 from ...base_provider import (
     AIMessage,
     AIResponse,
@@ -24,7 +26,6 @@ from ...base_provider import (
     ProviderCapabilities,
     ProviderStatus,
 )
-from ....config.settings import Settings
 
 logger = structlog.get_logger()
 
@@ -67,9 +68,7 @@ class OllamaProvider(BaseAIProvider):
             logger.info("Initializing Ollama provider")
 
             # Get host and model from config
-            self._host = getattr(
-                self._config, "ollama_host", "http://localhost:11434"
-            )
+            self._host = getattr(self._config, "ollama_host", "http://localhost:11434")
             self._model = getattr(self._config, "ollama_model", "codellama")
 
             # Create aiohttp session
@@ -145,9 +144,7 @@ class OllamaProvider(BaseAIProvider):
 
         try:
             # Build prompt with context
-            full_prompt = self._build_prompt(
-                prompt, working_directory, system_prompt
-            )
+            full_prompt = self._build_prompt(prompt, working_directory, system_prompt)
 
             # Prepare request payload
             payload = {
@@ -249,9 +246,7 @@ class OllamaProvider(BaseAIProvider):
 
         try:
             # Build prompt
-            full_prompt = self._build_prompt(
-                prompt, working_directory, system_prompt
-            )
+            full_prompt = self._build_prompt(prompt, working_directory, system_prompt)
 
             # Prepare streaming request
             payload = {

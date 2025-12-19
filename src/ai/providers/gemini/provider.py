@@ -4,11 +4,13 @@ This provides integration with Google's Gemini models through the
 Google AI Studio API.
 """
 
-import structlog
+import asyncio
 from pathlib import Path
 from typing import AsyncIterator, Optional
-import asyncio
 
+import structlog
+
+from ....config.settings import Settings
 from ...base_provider import (
     AIMessage,
     AIResponse,
@@ -17,7 +19,6 @@ from ...base_provider import (
     ProviderCapabilities,
     ProviderStatus,
 )
-from ....config.settings import Settings
 
 logger = structlog.get_logger()
 
@@ -125,9 +126,7 @@ class GeminiProvider(BaseAIProvider):
 
         try:
             # Build context-aware prompt
-            full_prompt = self._build_prompt(
-                prompt, working_directory, system_prompt
-            )
+            full_prompt = self._build_prompt(prompt, working_directory, system_prompt)
 
             # Generate response
             loop = asyncio.get_event_loop()
@@ -193,9 +192,7 @@ class GeminiProvider(BaseAIProvider):
 
         try:
             # Build prompt
-            full_prompt = self._build_prompt(
-                prompt, working_directory, system_prompt
-            )
+            full_prompt = self._build_prompt(prompt, working_directory, system_prompt)
 
             # Stream response
             loop = asyncio.get_event_loop()

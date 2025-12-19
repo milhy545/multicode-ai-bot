@@ -233,16 +233,14 @@ class TestArchiveProcessing:
     @pytest.mark.asyncio
     async def test_zip_bomb_protection(self, file_handler, temp_dir):
         """Test protection against ZIP bombs."""
-        # Create archive with files that appear large
         archive_path = temp_dir / "bomb.zip"
+        oversized_bytes = 101 * 1024 * 1024  # 101MB (over 100MB limit)
 
         with zipfile.ZipFile(archive_path, "w") as zf:
-            # Create a ZipInfo object with inflated size
-            info = zipfile.ZipInfo("large_file.txt")
-            info.file_size = 150 * 1024 * 1024  # 150MB (over 100MB limit)
-            info.compress_size = 1024  # Small compressed size
-            # Don't actually write that much data
-            zf.writestr(info, b"x" * 1024)
+            with zf.open("large_file.txt", "w") as target:
+                chunk = b"x" * (1024 * 1024)
+                for _ in range(oversized_bytes // len(chunk)):
+                    target.write(chunk)
 
         # Should raise ValueError
         with pytest.raises(ValueError, match="Archive too large"):

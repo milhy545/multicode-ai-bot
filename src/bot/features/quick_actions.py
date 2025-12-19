@@ -134,6 +134,10 @@ class QuickActionManager:
             List of suggested actions
         """
         try:
+            session_id = getattr(session, "id", None)
+            if not isinstance(session_id, str) or not session_id:
+                raise ValueError("Invalid session: missing id")
+
             # Analyze context
             context = await self._analyze_context(session)
 
@@ -170,13 +174,24 @@ class QuickActionManager:
         }
 
         # Analyze recent messages for context clues
-        if session.context:
+        if session.context is not None:
             recent_messages = session.context.get("recent_messages", [])
+            if not recent_messages:
+                return context
+
             for msg in recent_messages:
-                content = msg.get("content", "").lower()
+                if not isinstance(msg, dict):
+                    continue
+                content = msg.get("content")
+                if not content:
+                    continue
+                content = content.lower()
 
                 # Check for test indicators
-                if any(word in content for word in ["test", "pytest", "unittest"]):
+                if any(
+                    word in content
+                    for word in ["test", "pytest", "unittest", "jest", "mocha"]
+                ):
                     context["has_tests"] = True
 
                 # Check for package manager indicators

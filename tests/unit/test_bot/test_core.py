@@ -209,14 +209,16 @@ class TestHandlerRegistration:
 
                     # Verify CommandHandler was used for commands
                     command_handler_calls = [
-                        call for call in mock_application.add_handler.call_args_list
+                        call
+                        for call in mock_application.add_handler.call_args_list
                         if isinstance(call[0][0], CommandHandler)
                     ]
                     assert len(command_handler_calls) == 13  # 13 command handlers
 
                     # Verify MessageHandler was used for messages
                     message_handler_calls = [
-                        call for call in mock_application.add_handler.call_args_list
+                        call
+                        for call in mock_application.add_handler.call_args_list
                         if isinstance(call[0][0], MessageHandler)
                     ]
                     assert len(message_handler_calls) >= 3  # text, document, photo
@@ -254,7 +256,9 @@ class TestMiddleware:
 
         with patch("src.bot.middleware.security.security_middleware") as mock_security:
             with patch("src.bot.middleware.auth.auth_middleware") as mock_auth:
-                with patch("src.bot.middleware.rate_limit.rate_limit_middleware") as mock_rate_limit:
+                with patch(
+                    "src.bot.middleware.rate_limit.rate_limit_middleware"
+                ) as mock_rate_limit:
                     bot._add_middleware()
 
                     # Verify middleware handlers were added with correct groups
@@ -262,7 +266,8 @@ class TestMiddleware:
 
                     # Should have 3 middleware handlers
                     middleware_calls = [
-                        call for call in add_handler_calls
+                        call
+                        for call in add_handler_calls
                         if len(call[1]) > 0 and "group" in call[1]
                     ]
                     assert len(middleware_calls) == 3
@@ -367,6 +372,7 @@ class TestBotLifecycle:
     @pytest.mark.asyncio
     async def test_start_with_error(self, bot, mock_application):
         """Test bot start with initialization error."""
+
         # Initialize happens before try block, so error in app.start() is what gets wrapped
         async def mock_initialize():
             bot.app = mock_application
@@ -464,9 +470,7 @@ class TestErrorHandler:
         assert "🛡️" in message
 
     @pytest.mark.asyncio
-    async def test_error_handler_rate_limit_error(
-        self, bot, mock_update, mock_context
-    ):
+    async def test_error_handler_rate_limit_error(self, bot, mock_update, mock_context):
         """Test error handler with RateLimitExceeded."""
         mock_context.error = RateLimitExceeded("Too many requests")
 
@@ -526,7 +530,9 @@ class TestErrorHandler:
         await bot._error_handler(None, mock_context)
 
     @pytest.mark.asyncio
-    async def test_error_handler_with_audit_logger(self, bot, mock_update, mock_context):
+    async def test_error_handler_with_audit_logger(
+        self, bot, mock_update, mock_context
+    ):
         """Test error handler logs to audit system."""
         mock_audit_logger = AsyncMock()
         mock_context.bot_data["audit_logger"] = mock_audit_logger

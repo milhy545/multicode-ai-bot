@@ -120,9 +120,7 @@ class TestSQLiteSessionStorage:
         assert loaded_session.message_count == sample_session.message_count
 
     @pytest.mark.asyncio
-    async def test_save_session_update_existing(
-        self, session_storage, sample_session
-    ):
+    async def test_save_session_update_existing(self, session_storage, sample_session):
         """Test updating an existing session."""
         # Save initial session
         await session_storage.save_session(sample_session)

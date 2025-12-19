@@ -1,13 +1,13 @@
 """AI provider implementations."""
 
-from .claude import ClaudeProvider
-from .gemini import GeminiProvider
 from .blackbox import BlackboxProvider
-from .windsurf import WindsurfProvider
-from .openai import OpenAIProvider
-from .ollama import OllamaProvider
+from .claude import ClaudeProvider
 from .deepseek import DeepSeekProvider
+from .gemini import GeminiProvider
 from .groq import GroqProvider
+from .ollama import OllamaProvider
+from .openai import OpenAIProvider
+from .windsurf import WindsurfProvider
 
 __all__ = [
     "ClaudeProvider",

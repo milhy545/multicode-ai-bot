@@ -4,10 +4,13 @@ This module manages multiple AI providers, handles routing, fallbacks,
 and provides a unified interface for the bot to use.
 """
 
-import structlog
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Type
 
+import structlog
+
+from ..config.settings import Settings
+from ..exceptions import ConfigurationError
 from .base_provider import (
     AIMessage,
     AIResponse,
@@ -16,8 +19,6 @@ from .base_provider import (
     ProviderCapabilities,
     ProviderStatus,
 )
-from ..config.settings import Settings
-from ..exceptions import ConfigurationError
 
 logger = structlog.get_logger()
 
@@ -274,7 +275,9 @@ class AIProviderManager:
         """
         return list(self.providers.keys())
 
-    def get_provider_status(self, provider_name: Optional[str] = None) -> ProviderStatus:
+    def get_provider_status(
+        self, provider_name: Optional[str] = None
+    ) -> ProviderStatus:
         """Get status of a provider.
 
         Args:

@@ -140,7 +140,9 @@ class TestGetSuggestions:
     ):
         """Test suggestions when package manager is detected."""
         sample_session.context = {
-            "recent_messages": [{"role": "user", "content": "Install dependencies with npm"}]
+            "recent_messages": [
+                {"role": "user", "content": "Install dependencies with npm"}
+            ]
         }
 
         suggestions = await quick_action_manager.get_suggestions(sample_session)
@@ -181,7 +183,9 @@ class TestGetSuggestions:
         self, quick_action_manager, sample_session
     ):
         """Test that suggestions respect the limit parameter."""
-        suggestions = await quick_action_manager.get_suggestions(sample_session, limit=3)
+        suggestions = await quick_action_manager.get_suggestions(
+            sample_session, limit=3
+        )
 
         assert len(suggestions) <= 3
 
@@ -550,13 +554,17 @@ class TestExecuteAction:
         assert command == "test"  # Returns the command
 
     @pytest.mark.asyncio
-    async def test_execute_action_unknown_id(self, quick_action_manager, sample_session):
+    async def test_execute_action_unknown_id(
+        self, quick_action_manager, sample_session
+    ):
         """Test executing unknown action."""
         with pytest.raises(ValueError, match="Unknown action"):
             await quick_action_manager.execute_action("unknown_action", sample_session)
 
     @pytest.mark.asyncio
-    async def test_execute_action_with_callback(self, quick_action_manager, sample_session):
+    async def test_execute_action_with_callback(
+        self, quick_action_manager, sample_session
+    ):
         """Test executing action with callback."""
         callback = AsyncMock()
 
@@ -702,8 +710,6 @@ class TestEdgeCases:
         # Should be available in any context
         assert quick_action_manager._is_action_available(action, {}) is True
         assert (
-            quick_action_manager._is_action_available(
-                action, {"has_anything": True}
-            )
+            quick_action_manager._is_action_available(action, {"has_anything": True})
             is True
         )

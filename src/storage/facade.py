@@ -4,7 +4,7 @@ Provides simple API for the rest of the application.
 """
 
 from datetime import datetime
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 import structlog
 
@@ -16,6 +16,7 @@ from .models import (
     SessionModel,
     ToolUsageModel,
     UserModel,
+    UserTokenModel,
 )
 from .repositories import (
     AnalyticsRepository,
@@ -25,6 +26,7 @@ from .repositories import (
     SessionRepository,
     ToolUsageRepository,
     UserRepository,
+    UserTokenRepository,
 )
 
 logger = structlog.get_logger()
@@ -43,6 +45,7 @@ class Storage:
         self.audit = AuditLogRepository(self.db_manager)
         self.costs = CostTrackingRepository(self.db_manager)
         self.analytics = AnalyticsRepository(self.db_manager)
+        self.tokens = UserTokenRepository(self.db_manager)
 
     async def initialize(self):
         """Initialize storage system."""
@@ -224,6 +227,49 @@ class Storage:
             timestamp=datetime.utcnow(),
         )
         await self.audit.log_event(audit_event)
+
+    async def store_user_token(
+        self, user_id: int, token_hash: str, expires_at: Optional[datetime]
+    ) -> UserTokenModel:
+        """Store a user token."""
+        token = UserTokenModel(
+            user_id=user_id,
+            token_hash=token_hash,
+            created_at=datetime.utcnow(),
+            expires_at=expires_at,
+            last_used=None,
+            is_active=True,
+        )
+        return await self.tokens.store_token(token)
+
+    async def get_user_token(self, user_id: int) -> Optional[UserTokenModel]:
+        """Get a user's active token."""
+        return await self.tokens.get_user_token(user_id)
+
+    async def revoke_user_token(self, user_id: int) -> None:
+        """Revoke a user's token."""
+        await self.tokens.revoke_token(user_id)
+
+    async def touch_user_token(self, token_id: int) -> None:
+        """Update token usage timestamp."""
+        await self.tokens.update_last_used(token_id)
+
+    async def get_audit_events(
+        self,
+        user_id: Optional[int] = None,
+        event_type: Optional[str] = None,
+        start_time: Optional[datetime] = None,
+        end_time: Optional[datetime] = None,
+        limit: int = 100,
+    ) -> List[AuditLogModel]:
+        """Get audit events with filters."""
+        return await self.audit.get_audit_events(
+            user_id=user_id,
+            event_type=event_type,
+            start_time=start_time,
+            end_time=end_time,
+            limit=limit,
+        )
 
     # Convenience methods
 

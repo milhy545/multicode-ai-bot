@@ -377,7 +377,9 @@ class TestClaudeIntegration:
         assert mock_tool_monitor.get_user_tool_usage.called
 
     @pytest.mark.asyncio
-    async def test_shutdown(self, integration, mock_process_manager, mock_session_manager):
+    async def test_shutdown(
+        self, integration, mock_process_manager, mock_session_manager
+    ):
         """Test shutdown procedure."""
         await integration.shutdown()
 

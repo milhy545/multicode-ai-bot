@@ -1,14 +1,14 @@
 """Tests for session export feature."""
 
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 
 from src.bot.features.session_export import (
-    ExportFormat,
     ExportedSession,
+    ExportFormat,
     SessionExporter,
 )
 from src.storage.facade import Storage
@@ -668,12 +668,13 @@ class TestEdgeCases:
         self, session_exporter, mock_storage, sample_session
     ):
         """Test handling session with many messages."""
+        base_time = datetime(2024, 1, 1, 10, 0, 0)
         many_messages = [
             {
                 "id": f"msg{i}",
                 "role": "user" if i % 2 == 0 else "assistant",
                 "content": f"Message {i}",
-                "created_at": datetime(2024, 1, 1, 10, i, 0),
+                "created_at": base_time + timedelta(minutes=i),
             }
             for i in range(100)
         ]
@@ -756,7 +757,9 @@ class TestIntegration:
 
         # Export multiple times concurrently
         tasks = [
-            session_exporter.export_session(12345, "test-session-123", ExportFormat.MARKDOWN)
+            session_exporter.export_session(
+                12345, "test-session-123", ExportFormat.MARKDOWN
+            )
             for _ in range(5)
         ]
 

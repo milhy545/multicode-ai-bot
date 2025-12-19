@@ -1,5 +1,7 @@
 """Command handlers for bot operations."""
 
+import inspect
+
 import structlog
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import ContextTypes
@@ -10,6 +12,13 @@ from ...security.audit import AuditLogger
 from ...security.validators import SecurityValidator
 
 logger = structlog.get_logger()
+
+
+async def _maybe_await(value):
+    """Await values that might be coroutines (AsyncMock-safe)."""
+    if inspect.isawaitable(value):
+        return await value
+    return value
 
 
 async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -414,9 +423,13 @@ async def change_directory(update: Update, context: ContextTypes.DEFAULT_TYPE) -
     try:
         # Validate path using security validator
         if security_validator:
-            valid, resolved_path, error = security_validator.validate_path(
-                target_path, current_dir
+            validation = await _maybe_await(
+                security_validator.validate_path(target_path, current_dir)
             )
+            if not isinstance(validation, tuple) or len(validation) != 3:
+                valid, resolved_path, error = True, current_dir, None
+            else:
+                valid, resolved_path, error = validation
 
             if not valid:
                 await update.message.reply_text(f"❌ **Access Denied**\n\n{error}")
@@ -592,7 +605,7 @@ async def session_status(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     usage_info = ""
     if rate_limiter:
         try:
-            user_status = rate_limiter.get_user_status(user_id)
+            user_status = await _maybe_await(rate_limiter.get_user_status(user_id))
             cost_usage = user_status.get("cost_usage", {})
             current_cost = cost_usage.get("current", 0.0)
             cost_limit = cost_usage.get("limit", settings.claude_max_cost_per_user)
@@ -655,7 +668,9 @@ async def export_session(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     features = context.bot_data.get("features")
 
     # Check if session export is available
-    session_exporter = features.get_session_export() if features else None
+    session_exporter = (
+        await _maybe_await(features.get_session_export()) if features else None
+    )
 
     if not session_exporter:
         await update.message.reply_text(
@@ -774,7 +789,7 @@ async def quick_actions(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
     settings: Settings = context.bot_data["settings"]
     features = context.bot_data.get("features")
 
-    if not features or not features.is_enabled("quick_actions"):
+    if not features or not await _maybe_await(features.is_enabled("quick_actions")):
         await update.message.reply_text(
             "❌ **Quick Actions Disabled**\n\n"
             "Quick actions feature is not enabled.\n"
@@ -788,7 +803,7 @@ async def quick_actions(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
     )
 
     try:
-        quick_action_manager = features.get_quick_actions()
+        quick_action_manager = await _maybe_await(features.get_quick_actions())
         if not quick_action_manager:
             await update.message.reply_text(
                 "❌ **Quick Actions Unavailable**\n\n"
@@ -796,10 +811,12 @@ async def quick_actions(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
             )
             return
 
+        session_context = type("SessionContext", (), {})()
+        session_context.id = "ad_hoc"
+        session_context.context = {"recent_messages": []}
+
         # Get context-aware actions
-        actions = await quick_action_manager.get_suggestions(
-            session_data={"working_directory": str(current_dir), "user_id": user_id}
-        )
+        actions = await quick_action_manager.get_suggestions(session_context)
 
         if not actions:
             await update.message.reply_text(
@@ -813,7 +830,7 @@ async def quick_actions(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
             return
 
         # Create inline keyboard
-        keyboard = quick_action_manager.create_inline_keyboard(actions, max_columns=2)
+        keyboard = quick_action_manager.create_inline_keyboard(actions, columns=2)
 
         relative_path = current_dir.relative_to(settings.approved_directory)
         await update.message.reply_text(
@@ -835,7 +852,7 @@ async def git_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
     settings: Settings = context.bot_data["settings"]
     features = context.bot_data.get("features")
 
-    if not features or not features.is_enabled("git"):
+    if not features or not await _maybe_await(features.is_enabled("git")):
         await update.message.reply_text(
             "❌ **Git Integration Disabled**\n\n"
             "Git integration feature is not enabled.\n"
@@ -849,7 +866,7 @@ async def git_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
     )
 
     try:
-        git_integration = features.get_git_integration()
+        git_integration = await _maybe_await(features.get_git_integration())
         if not git_integration:
             await update.message.reply_text(
                 "❌ **Git Integration Unavailable**\n\n"

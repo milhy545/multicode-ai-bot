@@ -290,9 +290,7 @@ class TestRateLimitMiddleware:
         assert result is None
         mock_handler.assert_not_called()
 
-    async def test_rate_limit_exceeded_no_message(
-        self, mock_handler, mock_data
-    ):
+    async def test_rate_limit_exceeded_no_message(self, mock_handler, mock_data):
         """Test rate limit exceeded without message to reply to."""
         event = MagicMock()
         event.effective_user = MagicMock()
@@ -406,9 +404,7 @@ class TestCostTrackingMiddleware:
             assert result == "handler_result"
             mock_handler.assert_called_once()
 
-    async def test_handler_execution_failure(
-        self, mock_event, mock_rate_limiter
-    ):
+    async def test_handler_execution_failure(self, mock_event, mock_rate_limiter):
         """Test cost tracking when handler raises exception."""
         handler = AsyncMock()
         handler.side_effect = ValueError("Test error")
